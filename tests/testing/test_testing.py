@@ -4,9 +4,7 @@ from __future__ import annotations
 
 import uuid  # noqa: TCH003 — needed at runtime for SQLAlchemy mapped annotations
 
-import pytest
-from pyramid.config import Configurator
-from sqlalchemy import String, create_engine
+from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from pyramid_sa import Base, generate_uuid
@@ -20,32 +18,6 @@ class Widget(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     uuid: Mapped[uuid.UUID] = mapped_column(default=generate_uuid, unique=True)
     label: Mapped[str] = mapped_column(String(100))
-
-
-@pytest.fixture(scope="session")
-def pyramid_sa_engine():
-    """Override the plugin's default engine for these tests."""
-    engine = create_engine("sqlite://")
-    yield engine
-    Base.metadata.drop_all(engine)
-    engine.dispose()
-
-
-@pytest.fixture(scope="session")
-def app(pyramid_sa_engine):
-    """Minimal Pyramid app for testing the plugin fixtures."""
-    config = Configurator(settings={})
-    config.registry["dbengine"] = pyramid_sa_engine
-    config.include("pyramid_sa")
-
-    config.add_route("health", "/health")
-    config.add_view(
-        lambda request: {"status": "ok"}, route_name="health", renderer="json"
-    )
-
-    wsgi_app = config.make_wsgi_app()
-    Base.metadata.create_all(pyramid_sa_engine)
-    return wsgi_app
 
 
 def test_tm_is_doomed(pyramid_sa_tm):

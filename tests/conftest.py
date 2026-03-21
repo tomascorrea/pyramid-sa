@@ -16,7 +16,10 @@ from sqlalchemy.orm import Mapped, mapped_column
 from pyramid_sa import Base, generate_uuid, get_tm_session
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from pyramid.request import Request
+    from pyramid.router import Router
 
 
 class Item(Base):
@@ -62,13 +65,25 @@ def db_engine():
 
 
 @pytest.fixture(scope="session")
-def app(db_engine):
-    """Real Pyramid WSGI app with pyramid_sa and a test security policy."""
-    config = Configurator(settings={})
-    config.registry["dbengine"] = db_engine
-    config.include("pyramid_sa")
-    config.set_security_policy(TestSecurityPolicy())
-    return config.make_wsgi_app()
+def build_app(db_engine):
+    """App factory. Call with an optional configure callback to customise the app."""
+
+    def _build(configure: Callable[[Configurator], None] | None = None) -> Router:
+        config = Configurator(settings={})
+        config.registry["dbengine"] = db_engine
+        config.include("pyramid_sa")
+        config.set_security_policy(TestSecurityPolicy())
+        if configure is not None:
+            configure(config)
+        return config.make_wsgi_app()
+
+    return _build
+
+
+@pytest.fixture(scope="session")
+def app(build_app):
+    """Default WSGI app — override in module conftest for custom configuration."""
+    return build_app()
 
 
 @pytest.fixture()

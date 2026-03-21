@@ -1,0 +1,59 @@
+---
+description: Enforce test directory organisation and the build_app factory pattern
+globs: **/tests/**/*.py
+alwaysApply: false
+---
+
+# Test Organization
+
+## Directory Structure
+
+- All test files live inside **module subdirectories** of `tests/` (e.g. `tests/meta/`, `tests/renderer/`).
+- The `tests/` root contains **only** `conftest.py` and `__init__.py` — no test files.
+- Each module directory has its own `__init__.py`. Add a `conftest.py` when the module needs its own fixtures.
+
+## App Fixture via `build_app` Factory
+
+The root `tests/conftest.py` exposes a `build_app` session-scoped fixture that returns a factory callable:
+
+```python
+build_app(configure=None)  # → WSGI app
+```
+
+The default `app` fixture in root conftest calls `build_app()` with no customisation.
+
+### Customising the app for a module
+
+Override the `app` fixture in the module's `conftest.py` and pass a `configure` callback:
+
+```python
+@pytest.fixture(scope="session")
+def app(build_app):
+    def configure(config):
+        config.add_route("health", "/health")
+        config.add_view(...)
+    return build_app(configure=configure)
+```
+
+### Replacing the builder entirely
+
+If a module needs a fundamentally different app (e.g. no security policy), override `build_app` instead:
+
+```python
+@pytest.fixture(scope="session")
+def build_app(db_engine):
+    def _build(configure=None):
+        config = Configurator(settings={})
+        config.registry["dbengine"] = db_engine
+        config.include("pyramid_sa")
+        if configure is not None:
+            configure(config)
+        return config.make_wsgi_app()
+    return _build
+```
+
+## Rules
+
+- Never duplicate engine or app setup across test files — use the factory.
+- Self-contained tests (own engine, no shared fixtures) are fine for unit-style tests (e.g. tween, includeme).
+- Keep fixture definitions in `conftest.py`, not in test files.
