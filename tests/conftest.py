@@ -54,3 +54,12 @@ def dbsession(session_factory):
 @pytest.fixture()
 def fake_request():
     return FakeRequest()
+
+
+@pytest.fixture()
+def request_dbsession(session_factory, fake_request):
+    """Session bound to a fake request — handles rollback and close automatically."""
+    session = session_factory(info={"request": fake_request})
+    yield session
+    session.rollback()
+    session.close()
