@@ -72,10 +72,17 @@ class Item(Base):
 
 ### Alembic
 
-Create a minimal `alembic/env.py` in your app:
+Scaffold alembic in your project with a single command:
+
+```bash
+db init-alembic
+```
+
+This creates `alembic.ini`, `alembic/env.py`, `alembic/script.py.mako`, and `alembic/versions/` in the current directory, pre-wired with pyramid-sa helpers. Then edit `alembic/env.py` to import your models:
 
 ```python
 from alembic import context
+
 from pyramid_sa import Base
 from pyramid_sa.scripts.alembic import run_migrations_offline, run_migrations_online
 
@@ -88,6 +95,8 @@ if context.is_offline_mode():
 else:
     run_migrations_online(target_metadata)
 ```
+
+Migration versions live in your app (`alembic/versions/`), never in the library.
 
 ### CLI
 
@@ -109,7 +118,10 @@ def cli(ctx, config_uri):
 cli.add_command(db)
 ```
 
-Commands: `db drop`, `db initialize` (with `--drop-before` and `--run-thru-alembic` flags).
+Commands:
+- `db init-alembic` — scaffold alembic in the current directory (`--force` to overwrite)
+- `db drop` — drop all database tables
+- `db initialize` — create schema (`--drop-before`, `--run-thru-alembic` flags)
 
 ## Test Fixtures
 
