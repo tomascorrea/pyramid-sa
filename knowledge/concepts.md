@@ -17,6 +17,7 @@ Key domain concepts, terminology, and mental models for this project.
 
 - **Session lifecycle**: Each request gets one SQLAlchemy session. pyramid_tm commits on success, aborts on exception. zope.sqlalchemy registers the session with the transaction manager.
 - **Test isolation**: Tests use a doomed transaction manager — the transaction is always aborted after each test, rolling back all changes without needing cleanup.
+- **Test fixtures**: The conftest provides a layered hierarchy: `db_engine` → `app` (real Pyramid WSGI app) → `tm` (doomed TM) → `dbsession` → `app_request` (real request via `prepare()`) → `authenticated_request` (sets `test.userid` in environ). A `TestSecurityPolicy` reads the userid from `request.environ["test.userid"]`. All request fixtures use real Pyramid objects, never fakes.
 - **Audit trail**: Event listeners on `before_insert` and `before_update` pull `authenticated_userid` and `client_addr` from the request stored in `session.info["request"]`.
 
 ## Invariants
