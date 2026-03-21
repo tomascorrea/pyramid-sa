@@ -1,0 +1,53 @@
+[project]
+name = "pyramid-sa"
+version = "0.1.0"
+description = "Pyramid SQLAlchemy Integration"
+readme = "README.md"
+requires-python = ">=3.13"
+license = {text = "MIT"}
+dependencies = [
+    "pyramid",
+    "sqlalchemy>=2.0",
+    "alembic",
+    "pyramid-tm>=2.6",
+    "zope-sqlalchemy>=4.1",
+    "click>=8.1",
+    "camel-converter>=3.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/pyramid_sa"]
+
+[tool.ruff]
+src = ["src"]
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP", "B", "A", "SIM", "TCH"]
+
+[tool.black]
+line-length = 88
+target-version = ["py313"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src", "testing/src"]
+
+[tool.uv.sources]
+pyramid-sa-testing = { path = "testing", editable = true }
+
+[dependency-groups]
+dev = [
+    "ruff",
+    "black",
+    "pytest",
+    "mkdocs-material",
+    "webtest",
+    "transaction",
+    "waitress",
+    "pyramid-sa-testing",
+]
