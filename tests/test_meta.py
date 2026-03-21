@@ -66,24 +66,26 @@ def test_copy_with(dbsession):
     assert isinstance(copy, Item)
 
 
-def test_before_insert_sets_created_by(request_dbsession):
+def test_before_insert_sets_created_by(authenticated_request):
     """Verify the before_insert listener populates created_by and created_ip."""
+    dbsession = authenticated_request.dbsession
     item = Item(name="audited-item")
-    request_dbsession.add(item)
-    request_dbsession.flush()
+    dbsession.add(item)
+    dbsession.flush()
 
     assert item.created_by == "test-user"
     assert item.created_ip == "127.0.0.1"
 
 
-def test_before_update_sets_updated_by(request_dbsession):
+def test_before_update_sets_updated_by(authenticated_request):
     """Verify the before_update listener populates updated_by and updated_ip."""
+    dbsession = authenticated_request.dbsession
     item = Item(name="audited-item")
-    request_dbsession.add(item)
-    request_dbsession.flush()
+    dbsession.add(item)
+    dbsession.flush()
 
     item.name = "updated-name"
-    request_dbsession.flush()
+    dbsession.flush()
 
     assert item.updated_by == "test-user"
     assert item.updated_ip == "127.0.0.1"
