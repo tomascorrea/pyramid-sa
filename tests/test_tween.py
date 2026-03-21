@@ -9,47 +9,57 @@ from sqlalchemy.orm.exc import NoResultFound
 from pyramid_sa.tween import exception_tween_factory
 
 
-class TestExceptionTween:
-    def test_no_result_found_returns_404(self):
-        def handler(request):
-            raise NoResultFound()
+def test_no_result_found_returns_404():
+    """Verify NoResultFound is mapped to a 404 HTTPNotFound."""
 
-        tween = exception_tween_factory(handler, None)
-        request = pyramid_testing.DummyRequest()
+    def handler(request):
+        raise NoResultFound()
 
-        with pytest.raises(HTTPNotFound) as exc_info:
-            tween(request)
+    tween = exception_tween_factory(handler, None)
+    request = pyramid_testing.DummyRequest()
 
-        assert exc_info.value.json_body["error"] == "not_found"
+    with pytest.raises(HTTPNotFound) as exc_info:
+        tween(request)
 
-    def test_integrity_error_returns_409(self):
-        def handler(request):
-            raise IntegrityError("INSERT ...", {}, Exception("duplicate key"))
+    assert exc_info.value.json_body["error"] == "not_found"
 
-        tween = exception_tween_factory(handler, None)
-        request = pyramid_testing.DummyRequest()
 
-        with pytest.raises(HTTPConflict) as exc_info:
-            tween(request)
+def test_integrity_error_returns_409():
+    """Verify IntegrityError is mapped to a 409 HTTPConflict."""
 
-        assert exc_info.value.json_body["error"] == "conflict"
+    def handler(request):
+        raise IntegrityError("INSERT ...", {}, Exception("duplicate key"))
 
-    def test_normal_response_passes_through(self):
-        def handler(request):
-            return {"status": "ok"}
+    tween = exception_tween_factory(handler, None)
+    request = pyramid_testing.DummyRequest()
 
-        tween = exception_tween_factory(handler, None)
-        request = pyramid_testing.DummyRequest()
+    with pytest.raises(HTTPConflict) as exc_info:
+        tween(request)
 
-        result = tween(request)
-        assert result == {"status": "ok"}
+    assert exc_info.value.json_body["error"] == "conflict"
 
-    def test_other_exceptions_propagate(self):
-        def handler(request):
-            raise ValueError("unrelated")
 
-        tween = exception_tween_factory(handler, None)
-        request = pyramid_testing.DummyRequest()
+def test_normal_response_passes_through():
+    """Verify a normal response is returned unchanged."""
 
-        with pytest.raises(ValueError, match="unrelated"):
-            tween(request)
+    def handler(request):
+        return {"status": "ok"}
+
+    tween = exception_tween_factory(handler, None)
+    request = pyramid_testing.DummyRequest()
+
+    result = tween(request)
+    assert result == {"status": "ok"}
+
+
+def test_other_exceptions_propagate():
+    """Verify unhandled exceptions propagate without being caught."""
+
+    def handler(request):
+        raise ValueError("unrelated")
+
+    tween = exception_tween_factory(handler, None)
+    request = pyramid_testing.DummyRequest()
+
+    with pytest.raises(ValueError, match="unrelated"):
+        tween(request)

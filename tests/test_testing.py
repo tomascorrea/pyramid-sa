@@ -48,26 +48,33 @@ def app(pyramid_sa_engine):
     return wsgi_app
 
 
-class TestPluginFixtures:
-    def test_tm_is_doomed(self, pyramid_sa_tm):
-        assert pyramid_sa_tm.isDoomed()
+def test_tm_is_doomed(pyramid_sa_tm):
+    """Verify the transaction manager starts in a doomed state."""
+    assert pyramid_sa_tm.isDoomed()
 
-    def test_dbsession_works(self, pyramid_sa_dbsession):
-        widget = Widget(label="test-widget")
-        pyramid_sa_dbsession.add(widget)
-        pyramid_sa_dbsession.flush()
 
-        assert widget.id is not None
-        assert widget.label == "test-widget"
+def test_dbsession_works(pyramid_sa_dbsession):
+    """Verify the plugin dbsession can persist and flush objects."""
+    widget = Widget(label="test-widget")
+    pyramid_sa_dbsession.add(widget)
+    pyramid_sa_dbsession.flush()
 
-    def test_testapp_makes_requests(self, pyramid_sa_testapp):
-        response = pyramid_sa_testapp.get("/health", status=200)
-        assert response.json["status"] == "ok"
+    assert widget.id is not None
+    assert widget.label == "test-widget"
 
-    def test_app_request_has_dbsession(self, pyramid_sa_app_request):
-        assert pyramid_sa_app_request.dbsession is not None
 
-    def test_dbsession_rolls_back_between_tests(self, pyramid_sa_dbsession):
-        """This test runs after test_dbsession_works — the widget should not exist."""
-        count = pyramid_sa_dbsession.query(Widget).count()
-        assert count == 0
+def test_testapp_makes_requests(pyramid_sa_testapp):
+    """Verify the plugin testapp can send HTTP requests."""
+    response = pyramid_sa_testapp.get("/health", status=200)
+    assert response.json["status"] == "ok"
+
+
+def test_app_request_has_dbsession(pyramid_sa_app_request):
+    """Verify the app request object has a dbsession attribute."""
+    assert pyramid_sa_app_request.dbsession is not None
+
+
+def test_dbsession_rolls_back_between_tests(pyramid_sa_dbsession):
+    """This test runs after test_dbsession_works — the widget should not exist."""
+    count = pyramid_sa_dbsession.query(Widget).count()
+    assert count == 0
