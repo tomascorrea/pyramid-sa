@@ -80,6 +80,16 @@ Use this format when adding a new decision:
 
 **Consequences**: Each Pyramid app gets exactly the soft-delete behavior it opted into. Multiple apps in the same process (common in tests) don't interfere with each other.
 
+### 2026-03-22 — PostgreSQL test infrastructure via pytest-postgresql
+
+**Status**: Accepted
+
+**Context**: All tests ran against SQLite in-memory. The library had partial PostgreSQL awareness (e.g. `postgresql_where` in soft-delete partial indexes) but had never been tested against a real PostgreSQL instance. SQLite's behavioral differences (e.g. lack of real partial unique indexes) meant bugs could reach production undetected.
+
+**Decision**: Switch the entire test suite to PostgreSQL using pytest-postgresql. The `postgresql_proc` fixture starts a temporary PostgreSQL process per test session. The devcontainer Dockerfile installs PostgreSQL server binaries. The soft-delete module uses a dedicated database because its metadata transformation (unique constraints to partial indexes) conflicts with tables created by other modules before the transformation runs.
+
+**Consequences**: Tests now validate against real PostgreSQL behavior. The soft-delete partial unique index test, which passed on SQLite by coincidence, was validated to work correctly on PostgreSQL. The testing plugin (`pyramid-sa-testing`) also defaults to PostgreSQL, so consuming apps get PostgreSQL testing out of the box. The devcontainer image is slightly larger due to PostgreSQL server packages.
+
 ### 2026-03-22 — Configurable exception tween error body formatters
 
 **Status**: Accepted

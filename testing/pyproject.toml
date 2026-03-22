@@ -8,6 +8,8 @@ dependencies = [
     "pyramid-sa",
     "webtest",
     "transaction",
+    "pytest-postgresql",
+    "psycopg",
 ]
 
 [tool.uv.sources]

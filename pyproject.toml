@@ -50,4 +50,6 @@ dev = [
     "transaction",
     "waitress",
     "pyramid-sa-testing",
+    "pytest-postgresql",
+    "psycopg",
 ]
