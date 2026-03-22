@@ -3,10 +3,10 @@
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column
 
-from pyramid_sa import Base
+from pyramid_sa import AuditMixin, Base
 
 
-class Book(Base):
+class Book(AuditMixin, Base):
     __tablename__ = "books"
 
     id: Mapped[int] = mapped_column(primary_key=True)

@@ -4,16 +4,43 @@ import importlib
 
 from sqlalchemy.orm import configure_mappers
 
+from pyramid_sa.audit import AuditMixin, sa_enable_audit
 from pyramid_sa.meta import Base, generate_uuid
 from pyramid_sa.renderer import configure_json_renderer
 from pyramid_sa.session import get_engine, get_session_factory, get_tm_session
+from pyramid_sa.soft_delete import (
+    SoftDeleteMixin,
+    SoftDeleteSession,
+    sa_enable_soft_delete,
+)
+
+
+class Model(AuditMixin, SoftDeleteMixin, Base):
+    """Auditable, soft-deletable base class — the common case.
+
+    Use instead of ``Base`` when the model needs both audit columns and
+    soft-delete support::
+
+        class Article(Model):
+            __tablename__ = "articles"
+            ...
+    """
+
+    __abstract__ = True
+
 
 __all__ = [
+    "AuditMixin",
     "Base",
+    "Model",
+    "SoftDeleteMixin",
+    "SoftDeleteSession",
     "generate_uuid",
     "get_engine",
     "get_session_factory",
     "get_tm_session",
+    "sa_enable_audit",
+    "sa_enable_soft_delete",
 ]
 
 
@@ -66,3 +93,5 @@ def includeme(config):
     configure_json_renderer(config)
 
     config.add_directive("sa_scan_models", _scan_models_directive)
+    config.add_directive("sa_enable_audit", sa_enable_audit)
+    config.add_directive("sa_enable_soft_delete", sa_enable_soft_delete)

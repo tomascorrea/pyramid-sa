@@ -13,7 +13,7 @@ from pyramid.scripting import prepare
 from sqlalchemy import String, create_engine
 from sqlalchemy.orm import Mapped, mapped_column
 
-from pyramid_sa import Base, generate_uuid, get_tm_session
+from pyramid_sa import AuditMixin, Base, generate_uuid, get_tm_session
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -22,7 +22,7 @@ if TYPE_CHECKING:
     from pyramid.router import Router
 
 
-class Item(Base):
+class Item(AuditMixin, Base):
     """Example model used by tests."""
 
     __tablename__ = "items"
@@ -72,6 +72,7 @@ def build_app(db_engine):
         config = Configurator(settings={})
         config.registry["dbengine"] = db_engine
         config.include("pyramid_sa")
+        config.sa_enable_audit()
         config.set_security_policy(TestSecurityPolicy())
         if configure is not None:
             configure(config)
