@@ -29,15 +29,13 @@ def create_app(global_config=None, dbengine=None, **settings):
         config.registry["dbengine"] = dbengine
 
     config.include("pyramid_sa")
-
-    # Import your models so SQLAlchemy knows about them
-    import myapp.models  # noqa: F401
-    from sqlalchemy.orm import configure_mappers
-    configure_mappers()
+    config.sa_scan_models("myapp.models")
 
     config.scan(".views")
     return config.make_wsgi_app()
 ```
+
+`sa_scan_models` accepts one or more dotted module paths. It imports each module (registering models with `Base`) and calls `configure_mappers()` so all relationships are resolved.
 
 ### What `config.include("pyramid_sa")` does
 
@@ -46,6 +44,7 @@ def create_app(global_config=None, dbengine=None, **settings):
 3. Registers a session factory and adds `request.dbsession` as a reified property
 4. Adds an exception tween (`NoResultFound` → 404, `IntegrityError` → 409)
 5. Configures a JSON renderer with adapters for `datetime`, `date`, and `UUID`
+6. Registers the `sa_scan_models` directive on the Configurator
 
 ### Base model
 
