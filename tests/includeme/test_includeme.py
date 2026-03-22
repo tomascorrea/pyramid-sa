@@ -2,6 +2,7 @@
 
 import datetime
 
+import pytest
 import webtest
 from pyramid.config import Configurator
 from sqlalchemy import create_engine
@@ -85,3 +86,48 @@ def test_json_renderer_handles_datetime():
 
     response = testapp.get("/time")
     assert response.json["ts"] == "2026-03-21T12:00:00"
+
+
+def test_sa_scan_models_registers_directive():
+    """Verify includeme registers the sa_scan_models directive."""
+    config = Configurator(settings={"sqlalchemy.url": "sqlite://"})
+    config.include("pyramid_sa")
+
+    assert hasattr(config, "sa_scan_models")
+
+
+def test_sa_scan_models_imports_module():
+    """Verify sa_scan_models imports the given module and registers its tables."""
+    config = Configurator(settings={"sqlalchemy.url": "sqlite://"})
+    config.include("pyramid_sa")
+    config.sa_scan_models("tests.cli.app.models")
+
+    assert "books" in Base.metadata.tables
+
+
+def test_sa_scan_models_accepts_multiple_paths():
+    """Verify sa_scan_models accepts multiple dotted module paths."""
+    config = Configurator(settings={"sqlalchemy.url": "sqlite://"})
+    config.include("pyramid_sa")
+    config.sa_scan_models("tests.cli.app.models", "tests.conftest")
+
+    assert "books" in Base.metadata.tables
+    assert "items" in Base.metadata.tables
+
+
+def test_sa_scan_models_raises_on_no_args():
+    """Verify sa_scan_models raises ValueError when called without arguments."""
+    config = Configurator(settings={"sqlalchemy.url": "sqlite://"})
+    config.include("pyramid_sa")
+
+    with pytest.raises(ValueError, match="at least one module path"):
+        config.sa_scan_models()
+
+
+def test_sa_scan_models_raises_on_bad_module():
+    """Verify sa_scan_models raises ModuleNotFoundError for nonexistent modules."""
+    config = Configurator(settings={"sqlalchemy.url": "sqlite://"})
+    config.include("pyramid_sa")
+
+    with pytest.raises(ModuleNotFoundError):
+        config.sa_scan_models("nonexistent.module")

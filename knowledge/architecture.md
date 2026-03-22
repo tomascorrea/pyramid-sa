@@ -6,6 +6,7 @@ pyramid-sa is a Pyramid integration library that provides SQLAlchemy session man
 
 ## Components
 
+- **__init__.py** — `includeme` (Pyramid entry point), `sa_scan_models` directive (imports model modules and calls `configure_mappers()`)
 - **session.py** — Engine creation, session factory, transaction-managed sessions via pyramid_tm + zope.sqlalchemy
 - **meta.py** — `Base` (DeclarativeBase + AuditMixin), naming conventions, SQLAlchemy event listeners for audit fields
 - **tween.py** — Exception tween translating `NoResultFound` → 404 and `IntegrityError` → 409
@@ -18,10 +19,11 @@ pyramid-sa is a Pyramid integration library that provides SQLAlchemy session man
 ## Data Flow
 
 1. Consuming app calls `config.include("pyramid_sa")`
-2. `includeme` wires pyramid_tm, engine, session factory, tween, and renderer
-3. Each request gets a `request.dbsession` (reified, transaction-managed)
-4. Audit event listeners populate created_by/updated_by from the request
-5. On exceptions, the tween maps SA errors to HTTP responses
+2. `includeme` wires pyramid_tm, engine, session factory, tween, renderer, and the `sa_scan_models` directive
+3. App calls `config.sa_scan_models("myapp.models")` to import model modules and configure mappers
+4. Each request gets a `request.dbsession` (reified, transaction-managed)
+5. Audit event listeners populate created_by/updated_by from the request
+6. On exceptions, the tween maps SA errors to HTTP responses
 
 ## External Dependencies
 
