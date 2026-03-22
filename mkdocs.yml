@@ -1,5 +1,15 @@
 site_name: pyramid-sa
+site_description: Pyramid SQLAlchemy Integration
+repo_url: https://github.com/sensetek/pyramid-sa
 theme:
   name: material
 nav:
   - Home: index.md
+  - Getting Started: getting-started.md
+  - Base & Models: models.md
+  - Audit Trail: audit.md
+  - Soft Delete: soft-delete.md
+  - Error Handling: error-handling.md
+  - Database & Migrations: database.md
+  - Testing: testing.md
+  - API Reference: api.md
