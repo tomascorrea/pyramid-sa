@@ -79,3 +79,13 @@ Use this format when adding a new decision:
 **Decision**: Register soft-delete session events on the specific `sessionmaker` instance from `config.registry["dbsession_factory"]`, not the `Session` class. Audit events remain on the global `Mapper` (they check `isinstance` and are harmless when no `AuditMixin` models exist).
 
 **Consequences**: Each Pyramid app gets exactly the soft-delete behavior it opted into. Multiple apps in the same process (common in tests) don't interfere with each other.
+
+### 2026-03-22 — Configurable exception tween error body formatters
+
+**Status**: Accepted
+
+**Context**: The exception tween hardcoded JSON error response bodies (`{"error": "not_found", "message": "..."}` for 404, similar for 409). Consuming apps needed to customize the error schema to match their own API conventions.
+
+**Decision**: Add a `sa_error_formatter` Pyramid directive that accepts keyword-only `not_found` and `conflict` arguments, each a callable with signature `(request) -> dict`. The tween reads formatters from the registry at app creation time, falling back to default functions that preserve the original behavior. Both arguments are optional, allowing partial overrides.
+
+**Consequences**: Apps can customize error response bodies without forking or monkey-patching the tween. The formatter receives the request, giving access to locale, auth context, or any request-scoped data. Default behavior is unchanged for apps that don't call the directive.

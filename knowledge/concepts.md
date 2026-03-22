@@ -15,6 +15,7 @@ Key domain concepts, terminology, and mental models for this project.
 | SoftDeleteSession | Session subclass adding `hard_delete()` for real SQL DELETE, bypassing soft-delete interception |
 | sa_enable_audit | Pyramid directive that registers audit event listeners (`before_insert`, `before_update`) |
 | sa_enable_soft_delete | Pyramid directive that registers soft-delete event listeners (query filtering, delete interception, unique index transformation) |
+| sa_error_formatter | Pyramid directive that configures custom error body formatters (`not_found`, `conflict`) for the exception tween. Each formatter is `(request) -> dict`. |
 | Tween | Pyramid middleware-like layer that wraps request handling (used for exception mapping) |
 | pyramid_tm | Pyramid plugin that manages a transaction per request via the transaction package |
 | zope.sqlalchemy | Bridges SQLAlchemy sessions with the transaction package for automatic commit/rollback |
@@ -37,3 +38,4 @@ Key domain concepts, terminology, and mental models for this project.
 - `Base` always includes `ORMClass` — all models get `as_dict` and `copy_with`
 - Audit columns and soft-delete columns are opt-in via mixins; their behavior is opt-in via directives
 - The exception tween sits below `excview_tween_factory` so HTTP exceptions still work normally
+- **Error body formatters**: The exception tween uses configurable callables `(request) -> dict` to build error response bodies. Defaults produce `{"error": ..., "message": ...}`. Apps override via `config.sa_error_formatter(not_found=fn, conflict=fn)`.

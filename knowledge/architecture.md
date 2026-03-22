@@ -11,7 +11,7 @@ pyramid-sa is a Pyramid integration library that provides SQLAlchemy session man
 - **audit.py** — `AuditMixin` (audit columns), `before_insert`/`before_update` event listeners, `sa_enable_audit` directive
 - **soft_delete.py** — `SoftDeleteMixin` (soft-delete columns + `soft_delete()`/`restore()`/`is_deleted`), `SoftDeleteSession` (`hard_delete()`), event listeners (delete interception, query filtering, unique index transformation), `sa_enable_soft_delete` directive
 - **session.py** — Engine creation, session factory (uses `SoftDeleteSession`), transaction-managed sessions via pyramid_tm + zope.sqlalchemy
-- **tween.py** — Exception tween translating `NoResultFound` → 404 and `IntegrityError` → 409
+- **tween.py** — Exception tween translating `NoResultFound` → 404 and `IntegrityError` → 409, with configurable error body formatters via `sa_error_formatter` directive
 - **renderer.py** — JSON renderer with adapters for datetime, date, UUID
 - **scripts/alembic.py** — Offline/online migration runner helpers
 - **scripts/cli.py** — Click `db` command group (init-alembic, drop, initialize)
@@ -21,7 +21,7 @@ pyramid-sa is a Pyramid integration library that provides SQLAlchemy session man
 ## Data Flow
 
 1. Consuming app calls `config.include("pyramid_sa")`
-2. `includeme` wires pyramid_tm, engine, session factory, tween, renderer, and registers directives (`sa_scan_models`, `sa_enable_audit`, `sa_enable_soft_delete`)
+2. `includeme` wires pyramid_tm, engine, session factory, tween, renderer, and registers directives (`sa_scan_models`, `sa_enable_audit`, `sa_enable_soft_delete`, `sa_error_formatter`)
 3. App calls `config.sa_enable_audit()` to activate audit event listeners
 4. App calls `config.sa_enable_soft_delete()` to activate soft-delete behavior (query filtering, delete interception, unique index transformation)
 5. App calls `config.sa_scan_models("myapp.models")` to import model modules and configure mappers
