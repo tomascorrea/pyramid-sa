@@ -285,13 +285,21 @@ gh release list --limit 1
 
    Use the issue labels and nature of changes to decide.
 
-3. Create the release:
+3. **Bump the version in project files** before tagging. Update the `version` field in `pyproject.toml` (and any other files that declare the version). Commit and push:
+
+```bash
+git add pyproject.toml
+git commit -m "chore: bump version to <version>"
+git push
+```
+
+4. Create the release:
 
 ```bash
 gh release create v<version> --generate-notes --title "v<version>"
 ```
 
-4. Tell the user the release has been created and provide the URL.
+5. Tell the user the release has been created and provide the URL.
 
 ## Step 12: End
 
