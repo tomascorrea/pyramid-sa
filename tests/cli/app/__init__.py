@@ -1,9 +1,6 @@
 """Simulated consuming app for CLI integration tests."""
 
 from pyramid.config import Configurator
-from sqlalchemy.orm import configure_mappers
-
-import tests.cli.app.models  # noqa: F401
 
 
 def create_app(dbengine=None, **settings):
@@ -11,5 +8,5 @@ def create_app(dbengine=None, **settings):
     if dbengine is not None:
         config.registry["dbengine"] = dbengine
     config.include("pyramid_sa")
-    configure_mappers()
+    config.sa_scan_models("tests.cli.app.models")
     return config.make_wsgi_app()
