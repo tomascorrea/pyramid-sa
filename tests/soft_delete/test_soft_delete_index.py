@@ -7,7 +7,10 @@ from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from pyramid_sa import Base, SoftDeleteUniqueIndex, soft_delete_mapped_column
-from pyramid_sa.soft_delete import _ACTIVE_INDEX_SUFFIX
+from pyramid_sa.models.soft_delete import (
+    _ACTIVE_INDEX_SUFFIX,
+    _warn_plain_unique_constraints,
+)
 from tests.soft_delete.app.models import Article, ScopedArticle
 
 
@@ -52,9 +55,7 @@ def test_plain_unique_stays_global(app):
 
 def test_plain_unique_constraint_warns(caplog):
     """A plain UniqueConstraint on a soft-delete model logs a warning."""
-    from pyramid_sa.soft_delete import _warn_plain_unique_constraints
-
-    with caplog.at_level(logging.WARNING, logger="pyramid_sa.soft_delete"):
+    with caplog.at_level(logging.WARNING, logger="pyramid_sa.models.soft_delete"):
         _warn_plain_unique_constraints(Article)
 
     assert any("uuid" in record.message for record in caplog.records)

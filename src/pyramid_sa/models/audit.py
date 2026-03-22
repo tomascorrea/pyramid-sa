@@ -5,7 +5,7 @@ from datetime import datetime
 from sqlalchemy import DateTime, String, event, inspect
 from sqlalchemy.orm import Mapped, Mapper, mapped_column
 
-from pyramid_sa.meta import _now
+from pyramid_sa.utils import _now
 
 
 class AuditMixin:

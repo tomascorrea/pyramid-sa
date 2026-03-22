@@ -1,7 +1,4 @@
-"""SQLAlchemy declarative base and utility helpers."""
-
-import uuid
-from datetime import UTC, datetime
+"""SQLAlchemy declarative base and ORM utility methods."""
 
 from camel_converter import dict_to_camel
 from sqlalchemy import MetaData, inspect
@@ -14,14 +11,6 @@ NAMING_CONVENTION = {
     "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
     "pk": "pk_%(table_name)s",
 }
-
-
-def _now() -> datetime:
-    return datetime.now(UTC)
-
-
-def generate_uuid() -> uuid.UUID:
-    return uuid.uuid4()
 
 
 class ORMClass:

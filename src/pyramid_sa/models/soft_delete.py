@@ -1,7 +1,7 @@
 """Soft delete mixin, session subclass, and Pyramid directive."""
 
 import logging
-from datetime import UTC, datetime
+from datetime import datetime
 
 from sqlalchemy import (
     DateTime,
@@ -23,6 +23,7 @@ from sqlalchemy.orm import (
 )
 
 from pyramid_sa.meta import Base
+from pyramid_sa.utils import _now
 
 logger = logging.getLogger(__name__)
 
@@ -30,10 +31,6 @@ _HARD_DELETE_FLAG = "_pyramid_sa_hard_delete"
 _ACTIVE_INDEX_SUFFIX = "_active"
 
 _soft_delete_models: set[type] = set()
-
-
-def _now() -> datetime:
-    return datetime.now(UTC)
 
 
 class SoftDeleteUniqueIndex(Index):

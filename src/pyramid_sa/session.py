@@ -4,7 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from zope.sqlalchemy import register
 
-from pyramid_sa.soft_delete import SoftDeleteSession
+from pyramid_sa.models.soft_delete import SoftDeleteSession
 
 
 def get_engine(settings: dict, prefix: str = "sqlalchemy."):

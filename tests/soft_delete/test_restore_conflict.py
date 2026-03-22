@@ -2,7 +2,7 @@
 
 import pytest
 
-from pyramid_sa.soft_delete import RestoreConflictError
+from pyramid_sa.models.soft_delete import RestoreConflictError
 from tests.soft_delete.app.models import Article, ScopedArticle
 
 
