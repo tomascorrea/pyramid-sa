@@ -12,7 +12,9 @@ from pyramid_sa.soft_delete import (
     RestoreConflictError,
     SoftDeleteMixin,
     SoftDeleteSession,
+    SoftDeleteUniqueIndex,
     sa_enable_soft_delete,
+    soft_delete_mapped_column,
 )
 from pyramid_sa.tween import (
     default_conflict_body,
@@ -42,6 +44,7 @@ __all__ = [
     "RestoreConflictError",
     "SoftDeleteMixin",
     "SoftDeleteSession",
+    "SoftDeleteUniqueIndex",
     "default_conflict_body",
     "default_not_found_body",
     "generate_uuid",
@@ -51,6 +54,7 @@ __all__ = [
     "sa_enable_audit",
     "sa_enable_soft_delete",
     "sa_error_formatter",
+    "soft_delete_mapped_column",
 ]
 
 

@@ -1,5 +1,6 @@
 """Soft delete mixin, session subclass, and Pyramid directive."""
 
+import logging
 from datetime import UTC, datetime
 
 from sqlalchemy import (
@@ -12,9 +13,18 @@ from sqlalchemy import (
     inspect,
     select,
 )
-from sqlalchemy.orm import Mapped, Mapper, Session, mapped_column, with_loader_criteria
+from sqlalchemy.orm import (
+    Mapped,
+    MappedColumn,
+    Mapper,
+    Session,
+    mapped_column,
+    with_loader_criteria,
+)
 
 from pyramid_sa.meta import Base
+
+logger = logging.getLogger(__name__)
 
 _HARD_DELETE_FLAG = "_pyramid_sa_hard_delete"
 _ACTIVE_INDEX_SUFFIX = "_active"
@@ -24,6 +34,60 @@ _soft_delete_models: set[type] = set()
 
 def _now() -> datetime:
     return datetime.now(UTC)
+
+
+class SoftDeleteUniqueIndex(Index):
+    """Partial unique index that only constrains active (non-deleted) rows.
+
+    Place in ``__table_args__`` on any ``SoftDeleteMixin`` model to create
+    a unique index with ``WHERE deleted_at IS NULL``.  Soft-deleted rows
+    are excluded, allowing reuse of unique values::
+
+        class ScopedArticle(Model):
+            __tablename__ = "scoped_articles"
+            tenant_id: Mapped[str] = mapped_column(String(40))
+            slug: Mapped[str] = mapped_column(String(255))
+
+            __table_args__ = (SoftDeleteUniqueIndex("tenant_id", "slug"),)
+
+    For single-column uniqueness at the column level, use
+    ``soft_delete_mapped_column(unique=True)`` instead.
+    """
+
+    _is_soft_delete_index = True
+
+    def __init__(self, *columns: str, name: str | None = None) -> None:
+        self._sd_column_names = columns
+        self._sd_custom_name = name
+        super().__init__(name, *columns, unique=True)
+
+    def _set_parent(self, parent, **kwargs):
+        super()._set_parent(parent, **kwargs)
+        if "deleted_at" not in parent.c:
+            raise TypeError(
+                f"SoftDeleteUniqueIndex requires SoftDeleteMixin. "
+                f"Table '{parent.name}' has no 'deleted_at' column."
+            )
+
+
+def soft_delete_mapped_column(*args, unique: bool = False, **kwargs) -> MappedColumn:
+    """Like ``mapped_column`` but ``unique=True`` creates a soft-delete-aware index.
+
+    When *unique* is ``True``, the column gets a partial unique index
+    (``WHERE deleted_at IS NULL``) instead of a plain ``UniqueConstraint``.
+    Soft-deleted rows won't block reuse of the column's value::
+
+        class Article(Model):
+            slug: Mapped[str] = soft_delete_mapped_column(String(255), unique=True)
+            uuid: Mapped[str] = mapped_column(unique=True)  # stays globally unique
+
+    The partial index is created during mapper configuration
+    (``after_configured``).  The model must include ``SoftDeleteMixin``.
+    """
+    info = dict(kwargs.pop("info", None) or {})
+    if unique:
+        info["soft_delete_unique"] = True
+    return mapped_column(*args, unique=False, info=info, **kwargs)
 
 
 class RestoreConflictError(Exception):
@@ -184,8 +248,8 @@ def _soft_delete_query_filter(execute_state) -> None:
         )
 
 
-def _discover_and_transform_soft_delete_models() -> None:
-    """``after_configured`` handler: discover models and transform unique indexes."""
+def _discover_soft_delete_models() -> None:
+    """``after_configured`` handler: discover models and process soft-delete indexes."""
     for mapper in Base.registry.mappers:
         cls = mapper.class_
         if not isinstance(cls, type) or not issubclass(cls, SoftDeleteMixin):
@@ -193,54 +257,89 @@ def _discover_and_transform_soft_delete_models() -> None:
         if cls is SoftDeleteMixin:
             continue
         _soft_delete_models.add(cls)
-        _transform_unique_constraints(cls)
+        _finalize_soft_delete_indexes(cls)
+        _process_soft_delete_columns(cls)
+        _warn_plain_unique_constraints(cls)
 
 
-def _transform_unique_constraints(model: type) -> None:
-    """Replace plain unique constraints with filtered partial indexes."""
+def _finalize_soft_delete_indexes(model: type) -> None:
+    """Replace ``SoftDeleteUniqueIndex`` markers with configured partial indexes."""
     table = model.__table__
     deleted_at_col = table.c.deleted_at
 
-    constraints_to_remove: list[UniqueConstraint] = []
-    indexes_to_add: list[Index] = []
+    markers: list[tuple[Index, str, list]] = []
 
-    for constraint in list(table.constraints):
-        if not isinstance(constraint, UniqueConstraint):
-            continue
-        columns = list(constraint.columns)
-        if not columns:
-            continue
-        # Skip if this constraint is also the primary key
-        pk_col_names = {c.name for c in table.primary_key.columns}
-        constraint_col_names = {c.name for c in columns}
-        if constraint_col_names == pk_col_names:
+    for idx in list(table.indexes):
+        if not getattr(idx, "_is_soft_delete_index", False):
             continue
 
-        constraints_to_remove.append(constraint)
-        col_names = "_".join(c.name for c in columns)
-        idx_name = f"uq_{table.name}_{col_names}_active"
+        if idx._sd_custom_name:
+            name = idx._sd_custom_name
+        else:
+            col_names = "_".join(c.name for c in idx.columns)
+            name = f"uq_{table.name}_{col_names}{_ACTIVE_INDEX_SUFFIX}"
 
-        # Skip if we already created this index (idempotency)
+        markers.append((idx, name, list(idx.columns)))
+
+    for marker, name, columns in markers:
+        table.indexes.discard(marker)
+
+        if any(existing.name == name for existing in table.indexes):
+            continue
+
+        Index(
+            name,
+            *columns,
+            unique=True,
+            postgresql_where=deleted_at_col.is_(None),
+            sqlite_where=deleted_at_col.is_(None),
+        )
+
+
+def _process_soft_delete_columns(model: type) -> None:
+    """Create partial unique indexes for ``soft_delete_mapped_column`` columns."""
+    table = model.__table__
+    deleted_at_col = table.c.deleted_at
+
+    for col in table.columns:
+        if not col.info.get("soft_delete_unique"):
+            continue
+
+        idx_name = f"uq_{table.name}_{col.name}{_ACTIVE_INDEX_SUFFIX}"
         if any(idx.name == idx_name for idx in table.indexes):
             continue
 
-        indexes_to_add.append(
+        table.indexes.add(
             Index(
                 idx_name,
-                *columns,
+                col,
                 unique=True,
-                sqlite_where=deleted_at_col.is_(None),
                 postgresql_where=deleted_at_col.is_(None),
+                sqlite_where=deleted_at_col.is_(None),
             )
         )
 
-    for constraint in constraints_to_remove:
-        table.constraints.discard(constraint)
-        for col in constraint.columns:
-            col.unique = False
 
-    for idx in indexes_to_add:
-        table.indexes.add(idx)
+def _warn_plain_unique_constraints(model: type) -> None:
+    """Log a warning for plain ``UniqueConstraint`` on soft-delete models."""
+    table = model.__table__
+    pk_col_names = {c.name for c in table.primary_key.columns}
+
+    for constraint in table.constraints:
+        if not isinstance(constraint, UniqueConstraint):
+            continue
+        col_names = {c.name for c in constraint.columns}
+        if not col_names or col_names == pk_col_names:
+            continue
+        logger.warning(
+            "%s has a UniqueConstraint on (%s) but uses SoftDeleteMixin. "
+            "Consider SoftDeleteUniqueIndex or "
+            "soft_delete_mapped_column(unique=True) so soft-deleted rows "
+            "don't block reuse of unique values. If global uniqueness is "
+            "intended, this warning can be safely ignored.",
+            model.__name__,
+            ", ".join(sorted(col_names)),
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -257,8 +356,10 @@ def sa_enable_soft_delete(config) -> None:
       on models with ``SoftDeleteMixin``.
     * **Query filtering** — SELECT queries automatically exclude soft-deleted
       rows.  Bypass with ``execution_options(include_deleted=True)``.
-    * **Unique index transformation** — ``UniqueConstraint`` on soft-delete
-      models become filtered partial indexes (``WHERE deleted_at IS NULL``).
+    * **Index finalization** — ``SoftDeleteUniqueIndex`` markers and
+      ``soft_delete_mapped_column(unique=True)`` columns are converted into
+      partial unique indexes (``WHERE deleted_at IS NULL``).  A warning is
+      logged for any plain ``UniqueConstraint`` on a soft-delete model.
 
     Usage::
 
@@ -270,13 +371,9 @@ def sa_enable_soft_delete(config) -> None:
         event.listen(factory, "before_flush", _convert_deletes_to_soft_deletes)
     if not event.contains(factory, "do_orm_execute", _soft_delete_query_filter):
         event.listen(factory, "do_orm_execute", _soft_delete_query_filter)
-    if not event.contains(
-        Mapper, "after_configured", _discover_and_transform_soft_delete_models
-    ):
-        event.listen(
-            Mapper, "after_configured", _discover_and_transform_soft_delete_models
-        )
+    if not event.contains(Mapper, "after_configured", _discover_soft_delete_models):
+        event.listen(Mapper, "after_configured", _discover_soft_delete_models)
     # Run eagerly for mappers that were already configured before this
     # directive was called (common in test setups where models are imported
     # at collection time).
-    _discover_and_transform_soft_delete_models()
+    _discover_soft_delete_models()

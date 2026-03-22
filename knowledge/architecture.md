@@ -9,7 +9,7 @@ pyramid-sa is a Pyramid integration library that provides SQLAlchemy session man
 - **__init__.py** — `includeme` (Pyramid entry point), `sa_scan_models` directive, `Model` convenience base class (AuditMixin + SoftDeleteMixin + Base)
 - **meta.py** — `ORMClass` (utility methods: `as_dict`, `copy_with`), `Base` (DeclarativeBase + ORMClass), naming conventions, `generate_uuid`, `_now`
 - **audit.py** — `AuditMixin` (audit columns), `before_insert`/`before_update` event listeners, `sa_enable_audit` directive
-- **soft_delete.py** — `SoftDeleteMixin` (soft-delete columns + `soft_delete()`/`restore()`/`is_deleted`), `SoftDeleteSession` (`hard_delete()`), event listeners (delete interception, query filtering, unique index transformation), `sa_enable_soft_delete` directive
+- **soft_delete.py** — `SoftDeleteMixin` (soft-delete columns + `soft_delete()`/`restore()`/`is_deleted`/`can_restore()`), `SoftDeleteSession` (`hard_delete()`), `SoftDeleteUniqueIndex` (partial unique index for `__table_args__`), `soft_delete_mapped_column` (column-level partial unique index), `RestoreConflictError`, event listeners (delete interception, query filtering, index finalization), `sa_enable_soft_delete` directive
 - **session.py** — Engine creation, session factory (uses `SoftDeleteSession`), transaction-managed sessions via pyramid_tm + zope.sqlalchemy
 - **tween.py** — Exception tween translating `NoResultFound` → 404 and `IntegrityError` → 409, with configurable error body formatters via `sa_error_formatter` directive
 - **renderer.py** — JSON renderer with adapters for datetime, date, UUID
@@ -23,7 +23,7 @@ pyramid-sa is a Pyramid integration library that provides SQLAlchemy session man
 1. Consuming app calls `config.include("pyramid_sa")`
 2. `includeme` wires pyramid_tm, engine, session factory, tween, renderer, and registers directives (`sa_scan_models`, `sa_enable_audit`, `sa_enable_soft_delete`, `sa_error_formatter`)
 3. App calls `config.sa_enable_audit()` to activate audit event listeners
-4. App calls `config.sa_enable_soft_delete()` to activate soft-delete behavior (query filtering, delete interception, unique index transformation)
+4. App calls `config.sa_enable_soft_delete()` to activate soft-delete behavior (query filtering, delete interception, index finalization for `SoftDeleteUniqueIndex` and `soft_delete_mapped_column`)
 5. App calls `config.sa_scan_models("myapp.models")` to import model modules and configure mappers
 6. Each request gets a `request.dbsession` (reified, transaction-managed)
 7. Audit event listeners populate created_by/updated_by from the request
@@ -42,7 +42,7 @@ Mixins provide **columns** at import time. Directives activate **behavior** at a
 
 All tests run against PostgreSQL via pytest-postgresql. The `postgresql_proc` fixture (auto-registered by the plugin) starts a temporary PostgreSQL process on a random port per test session. Each `db_engine` fixture builds a `postgresql+psycopg://` URL from the process connection info. Doomed transactions provide per-test isolation.
 
-The soft-delete test module uses a dedicated database (`test_soft_delete`) because `sa_enable_soft_delete()` transforms unique constraints into partial indexes. Other modules share the default `postgres` database.
+The soft-delete test module uses a dedicated database (`test_soft_delete`) because `sa_enable_soft_delete()` finalizes `SoftDeleteUniqueIndex` markers and `soft_delete_mapped_column` columns into partial indexes during `after_configured`. Other modules share the default `postgres` database.
 
 The `pyramid_sa_testing` plugin provides `pyramid_sa_engine` (backed by `postgresql_proc`), `pyramid_sa_tm`, `pyramid_sa_dbsession`, `pyramid_sa_testapp`, and `pyramid_sa_app_request` fixtures.
 
