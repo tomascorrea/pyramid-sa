@@ -184,13 +184,18 @@ def sa_enable_soft_delete(config) -> None:
         config.include("pyramid_sa")
         config.sa_enable_soft_delete()
     """
-    if not event.contains(Session, "before_flush", _convert_deletes_to_soft_deletes):
-        event.listen(Session, "before_flush", _convert_deletes_to_soft_deletes)
-    if not event.contains(Session, "do_orm_execute", _soft_delete_query_filter):
-        event.listen(Session, "do_orm_execute", _soft_delete_query_filter)
+    factory = config.registry["dbsession_factory"]
+    if not event.contains(factory, "before_flush", _convert_deletes_to_soft_deletes):
+        event.listen(factory, "before_flush", _convert_deletes_to_soft_deletes)
+    if not event.contains(factory, "do_orm_execute", _soft_delete_query_filter):
+        event.listen(factory, "do_orm_execute", _soft_delete_query_filter)
     if not event.contains(
         Mapper, "after_configured", _discover_and_transform_soft_delete_models
     ):
         event.listen(
             Mapper, "after_configured", _discover_and_transform_soft_delete_models
         )
+    # Run eagerly for mappers that were already configured before this
+    # directive was called (common in test setups where models are imported
+    # at collection time).
+    _discover_and_transform_soft_delete_models()

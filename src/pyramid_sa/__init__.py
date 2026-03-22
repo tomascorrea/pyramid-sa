@@ -8,7 +8,11 @@ from pyramid_sa.audit import sa_enable_audit
 from pyramid_sa.meta import AuditMixin, Base, generate_uuid
 from pyramid_sa.renderer import configure_json_renderer
 from pyramid_sa.session import get_engine, get_session_factory, get_tm_session
-from pyramid_sa.soft_delete import SoftDeleteMixin, SoftDeleteSession, sa_enable_soft_delete
+from pyramid_sa.soft_delete import (
+    SoftDeleteMixin,
+    SoftDeleteSession,
+    sa_enable_soft_delete,
+)
 
 __all__ = [
     "AuditMixin",
