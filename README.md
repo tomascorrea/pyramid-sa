@@ -16,7 +16,16 @@ Pyramid SQLAlchemy Integration — a reusable library that wires SQLAlchemy into
 
 ## Documentation
 
-Full documentation is available at [tomascorrea.github.io/pyramid-sa](https://tomascorrea.github.io/pyramid-sa/), covering all features in detail.
+Full documentation is available at [tomascorrea.github.io/pyramid-sa](https://tomascorrea.github.io/pyramid-sa/).
+
+- [Getting Started](docs/getting-started.md) — installation, app factory wiring, what `include` sets up
+- [Models](docs/models.md) — `Base` vs `Model`, `as_dict()`, `copy_with()`, mixins
+- [Database & Migrations](docs/database.md) — Alembic scaffold, CLI commands, `env.py` setup
+- [Audit Trail](docs/audit.md) — `AuditMixin` columns and automatic field population
+- [Soft Delete](docs/soft-delete.md) — `SoftDeleteMixin`, filtering, unique indexes, restore
+- [Error Handling](docs/error-handling.md) — exception tween, custom error formatters
+- [Testing](docs/testing.md) — pytest fixtures, transaction isolation, `conftest.py` setup
+- [API Reference](docs/api.md) — full public API by module
 
 ## Installation
 
@@ -30,9 +39,9 @@ For test fixtures (dev only):
 pip install pyramid-sa-testing
 ```
 
-## Quick start
+## Quick Start
 
-In your Pyramid app factory:
+Wire `pyramid-sa` into your Pyramid app factory:
 
 ```python
 from pyramid.config import Configurator
@@ -53,121 +62,7 @@ def create_app(global_config=None, dbengine=None, **settings):
     return config.make_wsgi_app()
 ```
 
-### What `config.include("pyramid_sa")` does
-
-1. Includes `pyramid_tm` (transaction management)
-2. Creates the SQLAlchemy engine from `sqlalchemy.url` in settings (or uses `config.registry["dbengine"]` if pre-set)
-3. Registers a session factory and adds `request.dbsession` as a reified property
-4. Adds an exception tween (`NoResultFound` → 404, `IntegrityError` → 409)
-5. Configures a JSON renderer with adapters for `datetime`, `date`, and `UUID`
-6. Registers directives: `sa_scan_models`, `sa_enable_audit`, `sa_enable_soft_delete`, `sa_error_formatter`
-
-### Base vs Model
-
-Use `Base` for plain models. Use `Model` for models that need both audit columns and soft-delete:
-
-```python
-from pyramid_sa import Base, Model, generate_uuid
-
-
-class Item(Base):
-    """Plain model — no audit or soft-delete columns."""
-
-    __tablename__ = "items"
-
-    id: Mapped[int] = mapped_column(primary_key=True)
-    uuid: Mapped[uuid.UUID] = mapped_column(default=generate_uuid, unique=True)
-    name: Mapped[str] = mapped_column(String(255))
-
-
-class Article(Model):
-    """Audited + soft-deletable model."""
-
-    __tablename__ = "articles"
-
-    id: Mapped[int] = mapped_column(primary_key=True)
-    title: Mapped[str] = mapped_column(String(255))
-```
-
-See the [Models docs](docs/models.md) for `as_dict()`, `copy_with()`, and selective mixin usage.
-
-### Alembic
-
-Scaffold alembic in your project:
-
-```bash
-db init-alembic
-```
-
-Then edit `alembic/env.py` to import your models:
-
-```python
-from alembic import context
-
-from pyramid_sa import Base
-from pyramid_sa.scripts.alembic import run_migrations_offline, run_migrations_online
-
-import myapp.models  # noqa: F401
-
-target_metadata = Base.metadata
-
-if context.is_offline_mode():
-    run_migrations_offline(target_metadata)
-else:
-    run_migrations_online(target_metadata)
-```
-
-### CLI
-
-Compose the `db` commands into your app's CLI:
-
-```python
-import click
-from pyramid_sa.scripts.cli import db
-
-
-@click.group()
-@click.option("--config-uri", default="development.ini", show_default=True)
-@click.pass_context
-def cli(ctx, config_uri):
-    ctx.ensure_object(dict)
-    ctx.obj["config_uri"] = config_uri
-
-
-cli.add_command(db)
-```
-
-Commands: `db init-alembic`, `db drop`, `db initialize` (`--drop-before`, `--run-thru-alembic`).
-
-## Test Fixtures
-
-Install `pyramid-sa-testing` and the pytest plugin is auto-discovered:
-
-| Fixture | Scope | Description |
-|---|---|---|
-| `pyramid_sa_engine` | session | PostgreSQL engine via pytest-postgresql |
-| `pyramid_sa_tm` | function | Doomed transaction manager — auto-rollback after each test |
-| `pyramid_sa_dbsession` | function | DB session bound to the test transaction |
-| `pyramid_sa_testapp` | function | WebTest TestApp with session injected |
-| `pyramid_sa_app_request` | function | Real Pyramid request for service-layer testing |
-
-Your `conftest.py` must provide an `app` fixture:
-
-```python
-import pytest
-from pyramid_sa import Base
-
-
-@pytest.fixture(scope="session")
-def app(pyramid_sa_engine):
-    from myapp.app import create_app
-
-    wsgi_app = create_app(dbengine=pyramid_sa_engine)
-    Base.metadata.create_all(pyramid_sa_engine)
-    return wsgi_app
-```
-
-See the [Testing docs](docs/testing.md) for examples and advanced usage.
+See [Getting Started](docs/getting-started.md) for a full walkthrough of what `config.include("pyramid_sa")` sets up, model definitions, and next steps.
 
 ## Development
 
