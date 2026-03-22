@@ -11,7 +11,8 @@ pyramid-sa is a Pyramid integration library that provides SQLAlchemy session man
 - **tween.py** — Exception tween translating `NoResultFound` → 404 and `IntegrityError` → 409
 - **renderer.py** — JSON renderer with adapters for datetime, date, UUID
 - **scripts/alembic.py** — Offline/online migration runner helpers
-- **scripts/cli.py** — Click `db` command group (drop, initialize)
+- **scripts/cli.py** — Click `db` command group (init-alembic, drop, initialize)
+- **templates/alembic/** — Bundled alembic scaffold templates (alembic.ini, env.py, script.py.mako) copied into consuming apps by `db init-alembic`
 - **pyramid_sa_testing** (separate package) — Pytest plugin providing engine, session, transaction, and WebTest fixtures
 
 ## Data Flow
