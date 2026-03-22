@@ -1,9 +1,28 @@
-"""Audit event listeners and Pyramid directive for automatic audit fields."""
+"""Audit mixin, event listeners, and Pyramid directive."""
 
-from sqlalchemy import event, inspect
-from sqlalchemy.orm import Mapper
+from datetime import datetime
 
-from pyramid_sa.meta import AuditMixin
+from sqlalchemy import DateTime, String, event, inspect
+from sqlalchemy.orm import Mapped, Mapper, mapped_column
+
+from pyramid_sa.meta import _now
+
+
+class AuditMixin:
+    """Audit columns for tracking who created/updated a record and when."""
+
+    created_at: Mapped[datetime | None] = mapped_column(
+        DateTime,
+        default=_now,
+    )
+    updated_at: Mapped[datetime | None] = mapped_column(
+        DateTime,
+        onupdate=_now,
+    )
+    created_ip: Mapped[str | None] = mapped_column(String(40))
+    updated_ip: Mapped[str | None] = mapped_column(String(40))
+    created_by: Mapped[str | None] = mapped_column(String(40))
+    updated_by: Mapped[str | None] = mapped_column(String(40))
 
 
 def _set_created_audit_fields(mapper: Mapper, connection, target) -> None:

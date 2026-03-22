@@ -1,11 +1,11 @@
-"""SQLAlchemy declarative base, audit mixin, and utility helpers."""
+"""SQLAlchemy declarative base and utility helpers."""
 
 import uuid
 from datetime import UTC, datetime
 
 from camel_converter import dict_to_camel
-from sqlalchemy import DateTime, MetaData, String, inspect
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy import MetaData, inspect
+from sqlalchemy.orm import DeclarativeBase
 
 NAMING_CONVENTION = {
     "ix": "ix_%(column_0_label)s",
@@ -24,21 +24,8 @@ def generate_uuid() -> uuid.UUID:
     return uuid.uuid4()
 
 
-class AuditMixin:
-    """Audit columns and utility methods inherited by all models."""
-
-    created_at: Mapped[datetime | None] = mapped_column(
-        DateTime,
-        default=_now,
-    )
-    updated_at: Mapped[datetime | None] = mapped_column(
-        DateTime,
-        onupdate=_now,
-    )
-    created_ip: Mapped[str | None] = mapped_column(String(40))
-    updated_ip: Mapped[str | None] = mapped_column(String(40))
-    created_by: Mapped[str | None] = mapped_column(String(40))
-    updated_by: Mapped[str | None] = mapped_column(String(40))
+class ORMClass:
+    """Utility methods available on every model via Base."""
 
     def as_dict(
         self,
@@ -60,7 +47,7 @@ class AuditMixin:
             ret = dict_to_camel(ret)
         return ret
 
-    def copy_with(self, **kwargs) -> "AuditMixin":
+    def copy_with(self, **kwargs):
         excluded = {"id", "uuid", "created_at", "updated_at"}
         mapper_obj = inspect(self.__class__)
         data = {
@@ -71,5 +58,5 @@ class AuditMixin:
         return self.__class__(**data)
 
 
-class Base(DeclarativeBase):
+class Base(ORMClass, DeclarativeBase):
     metadata = MetaData(naming_convention=NAMING_CONVENTION)
