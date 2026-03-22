@@ -44,7 +44,7 @@ Create a detached copy with optional field overrides. Excludes `id`, `uuid`, `cr
 
 ---
 
-## `pyramid_sa.audit`
+## `pyramid_sa.models.audit`
 
 ### `AuditMixin`
 
@@ -56,7 +56,7 @@ Create a detached copy with optional field overrides. Excludes `id`, `uuid`, `cr
 
 ---
 
-## `pyramid_sa.soft_delete`
+## `pyramid_sa.models.soft_delete`
 
 ### `SoftDeleteMixin`
 

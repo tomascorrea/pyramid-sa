@@ -21,7 +21,7 @@ Use `AuditMixin` directly or inherit from `Model` (which includes it):
 
 ```python
 from pyramid_sa import Base
-from pyramid_sa.audit import AuditMixin
+from pyramid_sa.models.audit import AuditMixin
 
 
 class Item(AuditMixin, Base):

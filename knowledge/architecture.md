@@ -6,10 +6,12 @@ pyramid-sa is a Pyramid integration library that provides SQLAlchemy session man
 
 ## Components
 
-- **__init__.py** — `includeme` (Pyramid entry point), `sa_scan_models` directive, `Model` convenience base class (AuditMixin + SoftDeleteMixin + Base)
-- **meta.py** — `ORMClass` (utility methods: `as_dict`, `copy_with`), `Base` (DeclarativeBase + ORMClass), naming conventions, `generate_uuid`, `_now`
-- **audit.py** — `AuditMixin` (audit columns), `before_insert`/`before_update` event listeners, `sa_enable_audit` directive
-- **soft_delete.py** — `SoftDeleteMixin` (soft-delete columns + `soft_delete()`/`restore()`/`is_deleted`/`can_restore()`), `SoftDeleteSession` (`hard_delete()`), `SoftDeleteUniqueIndex` (partial unique index for `__table_args__`), `soft_delete_mapped_column` (column-level partial unique index), `RestoreConflictError`, event listeners (delete interception, query filtering, index finalization), `sa_enable_soft_delete` directive
+- **__init__.py** — `includeme` (Pyramid entry point), `sa_scan_models` directive, top-level re-exports
+- **meta.py** — `ORMClass` (utility methods: `as_dict`, `copy_with`), `Base` (DeclarativeBase + ORMClass), naming conventions
+- **utils.py** — Shared helpers: `_now` (UTC timestamp), `generate_uuid` (UUID v4)
+- **models/__init__.py** — `Model` convenience base class (AuditMixin + SoftDeleteMixin + Base), re-exports from audit and soft_delete submodules
+- **models/audit.py** — `AuditMixin` (audit columns), `before_insert`/`before_update` event listeners, `sa_enable_audit` directive
+- **models/soft_delete.py** — `SoftDeleteMixin` (soft-delete columns + `soft_delete()`/`restore()`/`is_deleted`/`can_restore()`), `SoftDeleteSession` (`hard_delete()`), `SoftDeleteUniqueIndex` (partial unique index for `__table_args__`), `soft_delete_mapped_column` (column-level partial unique index), `RestoreConflictError`, event listeners (delete interception, query filtering, index finalization), `sa_enable_soft_delete` directive
 - **session.py** — Engine creation, session factory (uses `SoftDeleteSession`), transaction-managed sessions via pyramid_tm + zope.sqlalchemy
 - **tween.py** — Exception tween translating `NoResultFound` → 404 and `IntegrityError` → 409, with configurable error body formatters via `sa_error_formatter` directive
 - **renderer.py** — JSON renderer with adapters for datetime, date, UUID

@@ -4,38 +4,26 @@ import importlib
 
 from sqlalchemy.orm import configure_mappers
 
-from pyramid_sa.audit import AuditMixin, sa_enable_audit
-from pyramid_sa.meta import Base, generate_uuid
-from pyramid_sa.renderer import configure_json_renderer
-from pyramid_sa.session import get_engine, get_session_factory, get_tm_session
-from pyramid_sa.soft_delete import (
+from pyramid_sa.meta import Base
+from pyramid_sa.models import (
+    AuditMixin,
+    Model,
     RestoreConflictError,
     SoftDeleteMixin,
     SoftDeleteSession,
     SoftDeleteUniqueIndex,
+    sa_enable_audit,
     sa_enable_soft_delete,
     soft_delete_mapped_column,
 )
+from pyramid_sa.renderer import configure_json_renderer
+from pyramid_sa.session import get_engine, get_session_factory, get_tm_session
 from pyramid_sa.tween import (
     default_conflict_body,
     default_not_found_body,
     sa_error_formatter,
 )
-
-
-class Model(AuditMixin, SoftDeleteMixin, Base):
-    """Auditable, soft-deletable base class — the common case.
-
-    Use instead of ``Base`` when the model needs both audit columns and
-    soft-delete support::
-
-        class Article(Model):
-            __tablename__ = "articles"
-            ...
-    """
-
-    __abstract__ = True
-
+from pyramid_sa.utils import generate_uuid
 
 __all__ = [
     "AuditMixin",
