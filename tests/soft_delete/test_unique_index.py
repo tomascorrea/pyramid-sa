@@ -4,7 +4,7 @@ import pytest
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 
-from tests.soft_delete.conftest import Article
+from tests.soft_delete.app.models import Article
 
 
 def test_unique_conflict_on_active_rows(dbsession):

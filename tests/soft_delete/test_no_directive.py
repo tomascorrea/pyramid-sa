@@ -2,7 +2,7 @@
 
 from sqlalchemy import select
 
-from tests.soft_delete.conftest import Task
+from tests.soft_delete.app.models import Task
 
 
 def test_delete_hard_deletes_without_directive(no_sd_dbsession):

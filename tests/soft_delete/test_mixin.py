@@ -1,6 +1,6 @@
 """Tests for SoftDeleteMixin — columns, soft_delete(), restore(), is_deleted."""
 
-from tests.soft_delete.conftest import Article
+from tests.soft_delete.app.models import Article
 
 
 def test_soft_delete_columns_exist(dbsession):

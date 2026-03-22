@@ -1,6 +1,6 @@
 """Tests for soft-delete audit fields (deleted_by, deleted_ip)."""
 
-from tests.soft_delete.conftest import Article
+from tests.soft_delete.app.models import Article
 
 
 def test_soft_delete_populates_audit_from_request(authenticated_request):

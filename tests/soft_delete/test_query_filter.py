@@ -2,7 +2,7 @@
 
 from sqlalchemy import select
 
-from tests.soft_delete.conftest import Article
+from tests.soft_delete.app.models import Article
 
 
 def test_soft_deleted_rows_excluded_from_query(dbsession):
