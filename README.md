@@ -2,6 +2,22 @@
 
 Pyramid SQLAlchemy Integration — a reusable library that wires SQLAlchemy into any Pyramid application.
 
+## Features
+
+- **Session management** — engine, transaction-managed sessions, `request.dbsession`
+- **Declarative base** — `Base` with naming conventions and utility methods (`as_dict`, `copy_with`)
+- **Audit trail** — opt-in `AuditMixin` tracking created/updated by whom and when
+- **Soft delete** — opt-in `SoftDeleteMixin` with query filtering, unique indexes, and safe restore
+- **Error mapping** — `NoResultFound` → 404, `IntegrityError` → 409, with customizable bodies
+- **JSON rendering** — `datetime`, `date`, `UUID` adapters out of the box
+- **Alembic scaffold** — `db init-alembic` for pre-wired migration setup
+- **CLI commands** — `db drop`, `db initialize` for schema management
+- **Test fixtures** — companion `pyramid-sa-testing` package with PostgreSQL-backed pytest plugin
+
+## Documentation
+
+Full documentation is available at the [docs site](docs/index.md), covering all features in detail.
+
 ## Installation
 
 ```bash
@@ -14,7 +30,7 @@ For test fixtures (dev only):
 pip install pyramid-sa-testing
 ```
 
-## Usage
+## Quick start
 
 In your Pyramid app factory:
 
@@ -29,13 +45,13 @@ def create_app(global_config=None, dbengine=None, **settings):
         config.registry["dbengine"] = dbengine
 
     config.include("pyramid_sa")
+    config.sa_enable_audit()          # optional: auto-populate audit fields
+    config.sa_enable_soft_delete()    # optional: soft-delete behavior
     config.sa_scan_models("myapp.models")
 
     config.scan(".views")
     return config.make_wsgi_app()
 ```
-
-`sa_scan_models` accepts one or more dotted module paths. It imports each module (registering models with `Base`) and calls `configure_mappers()` so all relationships are resolved.
 
 ### What `config.include("pyramid_sa")` does
 
@@ -44,40 +60,46 @@ def create_app(global_config=None, dbengine=None, **settings):
 3. Registers a session factory and adds `request.dbsession` as a reified property
 4. Adds an exception tween (`NoResultFound` → 404, `IntegrityError` → 409)
 5. Configures a JSON renderer with adapters for `datetime`, `date`, and `UUID`
-6. Registers the `sa_scan_models` directive on the Configurator
+6. Registers directives: `sa_scan_models`, `sa_enable_audit`, `sa_enable_soft_delete`, `sa_error_formatter`
 
-### Base model
+### Base vs Model
 
-All your models should inherit from `pyramid_sa.Base`:
+Use `Base` for plain models. Use `Model` for models that need both audit columns and soft-delete:
 
 ```python
-import uuid
-
-from sqlalchemy import String
-from sqlalchemy.orm import Mapped, mapped_column
-
-from pyramid_sa import Base, generate_uuid
+from pyramid_sa import Base, Model, generate_uuid
 
 
 class Item(Base):
+    """Plain model — no audit or soft-delete columns."""
+
     __tablename__ = "items"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     uuid: Mapped[uuid.UUID] = mapped_column(default=generate_uuid, unique=True)
     name: Mapped[str] = mapped_column(String(255))
+
+
+class Article(Model):
+    """Audited + soft-deletable model."""
+
+    __tablename__ = "articles"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    title: Mapped[str] = mapped_column(String(255))
 ```
 
-`Base` includes an `AuditMixin` that adds `created_at`, `updated_at`, `created_by`, `updated_by`, `created_ip`, `updated_ip` columns automatically.
+See the [Models docs](docs/models.md) for `as_dict()`, `copy_with()`, and selective mixin usage.
 
 ### Alembic
 
-Scaffold alembic in your project with a single command:
+Scaffold alembic in your project:
 
 ```bash
 db init-alembic
 ```
 
-This creates `alembic.ini`, `alembic/env.py`, `alembic/script.py.mako`, and `alembic/versions/` in the current directory, pre-wired with pyramid-sa helpers. Then edit `alembic/env.py` to import your models:
+Then edit `alembic/env.py` to import your models:
 
 ```python
 from alembic import context
@@ -94,8 +116,6 @@ if context.is_offline_mode():
 else:
     run_migrations_online(target_metadata)
 ```
-
-Migration versions live in your app (`alembic/versions/`), never in the library.
 
 ### CLI
 
@@ -117,18 +137,15 @@ def cli(ctx, config_uri):
 cli.add_command(db)
 ```
 
-Commands:
-- `db init-alembic` — scaffold alembic in the current directory (`--force` to overwrite)
-- `db drop` — drop all database tables
-- `db initialize` — create schema (`--drop-before`, `--run-thru-alembic` flags)
+Commands: `db init-alembic`, `db drop`, `db initialize` (`--drop-before`, `--run-thru-alembic`).
 
 ## Test Fixtures
 
-Install `pyramid-sa-testing` and the pytest plugin is auto-discovered. It provides:
+Install `pyramid-sa-testing` and the pytest plugin is auto-discovered:
 
 | Fixture | Scope | Description |
 |---|---|---|
-| `pyramid_sa_engine` | session | SQLite in-memory engine (override for PostgreSQL) |
+| `pyramid_sa_engine` | session | PostgreSQL engine via pytest-postgresql |
 | `pyramid_sa_tm` | function | Doomed transaction manager — auto-rollback after each test |
 | `pyramid_sa_dbsession` | function | DB session bound to the test transaction |
 | `pyramid_sa_testapp` | function | WebTest TestApp with session injected |
@@ -149,6 +166,8 @@ def app(pyramid_sa_engine):
     Base.metadata.create_all(pyramid_sa_engine)
     return wsgi_app
 ```
+
+See the [Testing docs](docs/testing.md) for examples and advanced usage.
 
 ## Development
 
