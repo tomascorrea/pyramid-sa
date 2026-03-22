@@ -149,6 +149,8 @@ Throughout execution, keep the issue and TodoWrite aligned:
 - If the plan needs adjustment mid-execution, update both the TodoWrite list and post an updated plan comment on the issue
 - If new tasks emerge, add them to both TodoWrite and the issue
 
+After all implementation tasks are complete, post a completion summary on the issue before proceeding.
+
 ## Step 7: Update Knowledge
 
 Before creating the PR, update the project's knowledge files:
@@ -163,9 +165,18 @@ git add knowledge/
 git commit -m "docs: update knowledge for <feature>"
 ```
 
-## Step 8: Pull Request
+## Step 8: Verify
 
-When all tasks are complete:
+Before creating the PR, run the full test suite and linter to confirm nothing is broken:
+
+1. Run the project's test suite (e.g., `pytest`, `go test`, `flutter test`). **All tests must pass.**
+2. Run the project's linter/formatter checks (e.g., `ruff check .`, `black --check .`).
+3. If tests or lints fail, fix the issues and re-run until green.
+4. Do **not** proceed to the PR step with failing tests.
+
+## Step 9: Pull Request
+
+When all tasks are complete and tests pass:
 
 1. Ensure all changes are committed
 2. Push the branch: `git push`
@@ -187,7 +198,7 @@ EOF
 
 4. Tell the user the PR is ready for review and provide the PR URL.
 
-## Step 9: Review & Merge
+## Step 10: Review & Merge
 
 After the PR is created, ask the user:
 
@@ -195,6 +206,7 @@ After the PR is created, ask the user:
 prompt: "The PR is open. What would you like to do?"
 options:
   - Check review status now
+  - PR is approved, please merge
   - Come back later — I'll request a review myself
 ```
 
@@ -231,11 +243,30 @@ git checkout main && git pull
 
 5. If checks are failing or reviews are not yet approved, tell the user what is pending and suggest coming back later.
 
+### If "PR is approved, please merge"
+
+Ask for the merge strategy:
+
+```
+prompt: "Which merge strategy?"
+options:
+  - Squash and merge
+  - Merge commit
+  - Rebase and merge
+```
+
+Then merge:
+
+```bash
+gh pr merge --<strategy> --delete-branch
+git checkout main && git pull
+```
+
 ### If "Come back later"
 
 Tell the user they can resume this step by asking to check the PR status or merge. End the current session here — the Release step runs after the PR is merged.
 
-## Step 10: Release
+## Step 11: Release
 
 > This step only applies to projects with a release flow.
 
@@ -262,7 +293,7 @@ gh release create v<version> --generate-notes --title "v<version>"
 
 4. Tell the user the release has been created and provide the URL.
 
-## Step 11: End
+## Step 12: End
 
 Summarize what was accomplished:
 - Issue number and title

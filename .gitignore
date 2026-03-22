@@ -10,3 +10,5 @@ build/
 .env
 site/
 *.sqlite
+
+.DS_Store
