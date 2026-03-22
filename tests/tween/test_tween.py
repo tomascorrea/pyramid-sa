@@ -1,65 +1,45 @@
-"""Tests for pyramid_sa.tween — exception-to-HTTP mapping."""
+"""Tests for the exception tween with default error formatters."""
 
 import pytest
-from pyramid import testing as pyramid_testing
-from pyramid.httpexceptions import HTTPConflict, HTTPNotFound
-from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm.exc import NoResultFound
-
-from pyramid_sa.tween import exception_tween_factory
+import webtest
 
 
-def test_no_result_found_returns_404():
-    """Verify NoResultFound is mapped to a 404 HTTPNotFound."""
+def test_not_found_returns_404_with_default_body(app):
+    """Verify NoResultFound maps to 404 with the default error body."""
+    testapp = webtest.TestApp(app)
+    response = testapp.get("/not-found", expect_errors=True)
 
-    def handler(request):
-        raise NoResultFound()
-
-    tween = exception_tween_factory(handler, None)
-    request = pyramid_testing.DummyRequest()
-
-    with pytest.raises(HTTPNotFound) as exc_info:
-        tween(request)
-
-    assert exc_info.value.json_body["error"] == "not_found"
+    assert response.status_int == 404
+    assert response.json == {
+        "error": "not_found",
+        "message": "Resource not found.",
+    }
 
 
-def test_integrity_error_returns_409():
-    """Verify IntegrityError is mapped to a 409 HTTPConflict."""
+def test_integrity_error_returns_409_with_default_body(app):
+    """Verify IntegrityError maps to 409 with the default error body."""
+    testapp = webtest.TestApp(app)
+    response = testapp.get("/conflict", expect_errors=True)
 
-    def handler(request):
-        raise IntegrityError("INSERT ...", {}, Exception("duplicate key"))
-
-    tween = exception_tween_factory(handler, None)
-    request = pyramid_testing.DummyRequest()
-
-    with pytest.raises(HTTPConflict) as exc_info:
-        tween(request)
-
-    assert exc_info.value.json_body["error"] == "conflict"
+    assert response.status_int == 409
+    assert response.json == {
+        "error": "conflict",
+        "message": "Operation violates a uniqueness constraint.",
+    }
 
 
-def test_normal_response_passes_through():
+def test_normal_response_passes_through(app):
     """Verify a normal response is returned unchanged."""
+    testapp = webtest.TestApp(app)
+    response = testapp.get("/ok")
 
-    def handler(request):
-        return {"status": "ok"}
-
-    tween = exception_tween_factory(handler, None)
-    request = pyramid_testing.DummyRequest()
-
-    result = tween(request)
-    assert result == {"status": "ok"}
+    assert response.status_int == 200
+    assert response.json == {"status": "ok"}
 
 
-def test_other_exceptions_propagate():
-    """Verify unhandled exceptions propagate without being caught."""
-
-    def handler(request):
-        raise ValueError("unrelated")
-
-    tween = exception_tween_factory(handler, None)
-    request = pyramid_testing.DummyRequest()
+def test_other_exceptions_propagate(app):
+    """Verify unhandled exceptions are not caught by the tween."""
+    testapp = webtest.TestApp(app)
 
     with pytest.raises(ValueError, match="unrelated"):
-        tween(request)
+        testapp.get("/value-error")

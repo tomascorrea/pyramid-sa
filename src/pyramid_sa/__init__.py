@@ -13,6 +13,11 @@ from pyramid_sa.soft_delete import (
     SoftDeleteSession,
     sa_enable_soft_delete,
 )
+from pyramid_sa.tween import (
+    default_conflict_body,
+    default_not_found_body,
+    sa_error_formatter,
+)
 
 
 class Model(AuditMixin, SoftDeleteMixin, Base):
@@ -35,12 +40,15 @@ __all__ = [
     "Model",
     "SoftDeleteMixin",
     "SoftDeleteSession",
+    "default_conflict_body",
+    "default_not_found_body",
     "generate_uuid",
     "get_engine",
     "get_session_factory",
     "get_tm_session",
     "sa_enable_audit",
     "sa_enable_soft_delete",
+    "sa_error_formatter",
 ]
 
 
@@ -95,3 +103,4 @@ def includeme(config):
     config.add_directive("sa_scan_models", _scan_models_directive)
     config.add_directive("sa_enable_audit", sa_enable_audit)
     config.add_directive("sa_enable_soft_delete", sa_enable_soft_delete)
+    config.add_directive("sa_error_formatter", sa_error_formatter)
