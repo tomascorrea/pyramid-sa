@@ -11,7 +11,8 @@ Key domain concepts, terminology, and mental models for this project.
 | ORMClass | Plain Python class providing `as_dict` and `copy_with`; mixed into Base so all models get utility methods |
 | Model | Convenience base class combining AuditMixin + SoftDeleteMixin + Base — the common case for most models |
 | AuditMixin | Mixin adding created_at/updated_at/created_by/updated_by/created_ip/updated_ip columns |
-| SoftDeleteMixin | Mixin adding deleted_at/deleted_by/deleted_ip columns plus `soft_delete()`, `restore()`, `is_deleted` |
+| SoftDeleteMixin | Mixin adding deleted_at/deleted_by/deleted_ip columns plus `soft_delete()`, `restore()`, `can_restore()`, `is_deleted` |
+| RestoreConflictError | Exception raised by `restore()` when an active row conflicts with the soft-deleted row's unique values. Has `instance` and `conflicts` (list of column-name tuples) attributes. |
 | SoftDeleteSession | Session subclass adding `hard_delete()` for real SQL DELETE, bypassing soft-delete interception |
 | sa_enable_audit | Pyramid directive that registers audit event listeners (`before_insert`, `before_update`) |
 | sa_enable_soft_delete | Pyramid directive that registers soft-delete event listeners (query filtering, delete interception, unique index transformation) |
@@ -31,6 +32,7 @@ Key domain concepts, terminology, and mental models for this project.
 - **Test fixtures**: The conftest provides a layered hierarchy: `db_engine` → `app` (real Pyramid WSGI app) → `tm` (doomed TM) → `dbsession` → `app_request` (real request via `prepare()`) → `authenticated_request` (sets `test.userid` in environ). A `TestSecurityPolicy` reads the userid from `request.environ["test.userid"]`. All request fixtures use real Pyramid objects, never fakes.
 - **Audit trail**: Event listeners on `before_insert` and `before_update` pull `authenticated_userid` and `client_addr` from the request stored in `session.info["request"]`.
 - **Unique index transformation**: When `sa_enable_soft_delete()` is called, `UniqueConstraint`s on soft-delete models are replaced with filtered partial indexes (`WHERE deleted_at IS NULL`), allowing soft-deleted rows' unique values to be reused.
+- **Restore conflict safety**: `restore()` calls `can_restore()` before clearing `deleted_at`. If an active row holds a conflicting unique value, `RestoreConflictError` is raised with details about which column groups conflict. `can_restore()` is also available independently for pre-checking without modifying the instance.
 
 ## Invariants
 

@@ -99,3 +99,13 @@ Use this format when adding a new decision:
 **Decision**: Add a `sa_error_formatter` Pyramid directive that accepts keyword-only `not_found` and `conflict` arguments, each a callable with signature `(request) -> dict`. The tween reads formatters from the registry at app creation time, falling back to default functions that preserve the original behavior. Both arguments are optional, allowing partial overrides.
 
 **Consequences**: Apps can customize error response bodies without forking or monkey-patching the tween. The formatter receives the request, giving access to locale, auth context, or any request-scoped data. Default behavior is unchanged for apps that don't call the directive.
+
+### 2026-03-22 — Restore conflict safety via can_restore()
+
+**Status**: Accepted
+
+**Context**: When a soft-deleted row is restored but another active row already holds its unique value, the database raises an opaque `IntegrityError` referencing a partial index name. Developers had no pre-check and no friendly error message.
+
+**Decision**: Add `can_restore()` to `SoftDeleteMixin` that inspects the model's partial unique indexes (created by `_transform_unique_constraints`, named `uq_{table}_{cols}_active`) and queries for active rows with matching values. `restore()` calls `can_restore()` before clearing `deleted_at` and raises `RestoreConflictError` if conflicts exist. The check runs only when `restore()` is called — no per-flush overhead. `can_restore()` is also available independently for pre-checking. Considered alternatives: `before_flush` event listener (rejected — too expensive on every flush), separate `safe_restore()` method (rejected — easy to forget).
+
+**Consequences**: Developers get an immediate, descriptive error when restoring would violate uniqueness. `RestoreConflictError` includes the conflicting column groups and the instance. Works for single-column and multi-column unique constraints. Models without partial unique indexes (no `sa_enable_soft_delete()` called, or no unique columns) always return safe from `can_restore()`.
