@@ -2,18 +2,51 @@
 
 from datetime import UTC, datetime
 
-from sqlalchemy import DateTime, Index, String, UniqueConstraint, event, inspect
+from sqlalchemy import (
+    DateTime,
+    Index,
+    String,
+    UniqueConstraint,
+    and_,
+    event,
+    inspect,
+    select,
+)
 from sqlalchemy.orm import Mapped, Mapper, Session, mapped_column, with_loader_criteria
 
 from pyramid_sa.meta import Base
 
 _HARD_DELETE_FLAG = "_pyramid_sa_hard_delete"
+_ACTIVE_INDEX_SUFFIX = "_active"
 
 _soft_delete_models: set[type] = set()
 
 
 def _now() -> datetime:
     return datetime.now(UTC)
+
+
+class RestoreConflictError(Exception):
+    """Raised when restoring a soft-deleted row would violate a unique constraint.
+
+    Attributes:
+        instance: The model instance that cannot be restored.
+        conflicts: Column groups that conflict, e.g. ``[("slug",)]`` or
+            ``[("tenant_id", "code")]`` for a multi-column unique.
+    """
+
+    def __init__(self, instance: object, conflicts: list[tuple[str, ...]]) -> None:
+        self.instance = instance
+        self.conflicts = conflicts
+        model_name = type(instance).__name__
+        col_desc = ", ".join(
+            "(" + ", ".join(cols) + ")" if len(cols) > 1 else cols[0]
+            for cols in conflicts
+        )
+        super().__init__(
+            f"Cannot restore {model_name}: "
+            f"unique conflict on {col_desc} with active rows."
+        )
 
 
 class SoftDeleteMixin:
@@ -45,8 +78,56 @@ class SoftDeleteMixin:
             )
             self.deleted_ip = request.client_addr
 
+    def can_restore(self) -> list[tuple[str, ...]]:
+        """Check whether restoring would conflict with active unique values.
+
+        Returns a list of conflicting column groups.  An empty list means
+        restore is safe.  Each element is a tuple of column names that form
+        a unique constraint, e.g. ``("slug",)`` or ``("tenant_id", "code")``.
+
+        Raises ``RuntimeError`` if the instance is not attached to a session.
+        """
+        session = inspect(self).session
+        if session is None:
+            raise RuntimeError(
+                f"Cannot check restore conflicts: "
+                f"{type(self).__name__} is not attached to a session."
+            )
+
+        table = type(self).__table__
+        conflicts: list[tuple[str, ...]] = []
+
+        for idx in table.indexes:
+            if not idx.unique or not idx.name:
+                continue
+            if not idx.name.endswith(_ACTIVE_INDEX_SUFFIX):
+                continue
+
+            col_names = tuple(c.name for c in idx.columns)
+            conditions = [table.c.deleted_at.is_(None)]
+            for col_name in col_names:
+                conditions.append(table.c[col_name] == getattr(self, col_name))
+
+            stmt = (
+                select(table.c[col_names[0]])
+                .where(and_(*conditions))
+                .limit(1)
+                .execution_options(include_deleted=True)
+            )
+            if session.execute(stmt).first() is not None:
+                conflicts.append(col_names)
+
+        return conflicts
+
     def restore(self) -> None:
-        """Un-delete this instance."""
+        """Un-delete this instance.
+
+        Raises ``RestoreConflictError`` if restoring would violate a unique
+        constraint with an existing active row.
+        """
+        conflicts = self.can_restore()
+        if conflicts:
+            raise RestoreConflictError(self, conflicts)
         self.deleted_at = None
         self.deleted_by = None
         self.deleted_ip = None
