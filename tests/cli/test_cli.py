@@ -10,12 +10,21 @@ from sqlalchemy import create_engine, inspect
 
 from pyramid_sa.scripts.cli import db
 
+ENV_PY = """\
+from alembic import context
 
-@pytest.fixture()
-def work_dir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
-    """Change into a temporary directory for each test."""
-    monkeypatch.chdir(tmp_path)
-    return tmp_path
+from pyramid_sa import Base
+from pyramid_sa.scripts.alembic import run_migrations_offline, run_migrations_online
+
+import tests.cli.app.models  # noqa: F401
+
+target_metadata = Base.metadata
+
+if context.is_offline_mode():
+    run_migrations_offline(target_metadata)
+else:
+    run_migrations_online(target_metadata)
+"""
 
 
 def test_init_alembic_creates_scaffold(work_dir: Path) -> None:
@@ -33,7 +42,9 @@ def test_init_alembic_creates_scaffold(work_dir: Path) -> None:
     assert "Alembic scaffold ready" in result.output
 
 
-def test_init_alembic_env_py_contains_pyramid_sa_imports(work_dir: Path) -> None:
+def test_init_alembic_env_py_contains_pyramid_sa_imports(
+    work_dir: Path,
+) -> None:
     """Generated env.py is pre-wired with pyramid-sa helpers."""
     runner = CliRunner()
     runner.invoke(db, ["init-alembic"], catch_exceptions=False)
@@ -68,7 +79,9 @@ def test_init_alembic_force_overwrites(work_dir: Path) -> None:
     assert "[alembic]" in ini_path.read_text()
 
 
-def test_init_alembic_refuses_when_only_ini_exists(work_dir: Path) -> None:
+def test_init_alembic_refuses_when_only_ini_exists(
+    work_dir: Path,
+) -> None:
     """Aborts when only alembic.ini exists."""
     (work_dir / "alembic.ini").write_text("old")
 
@@ -79,7 +92,9 @@ def test_init_alembic_refuses_when_only_ini_exists(work_dir: Path) -> None:
     assert "Already exists" in result.output
 
 
-def test_init_alembic_refuses_when_only_dir_exists(work_dir: Path) -> None:
+def test_init_alembic_refuses_when_only_dir_exists(
+    work_dir: Path,
+) -> None:
     """Aborts when only the alembic/ directory exists."""
     (work_dir / "alembic").mkdir()
 
@@ -90,10 +105,15 @@ def test_init_alembic_refuses_when_only_dir_exists(work_dir: Path) -> None:
     assert "Already exists" in result.output
 
 
-def test_init_alembic_autogenerate_creates_migration(work_dir: Path) -> None:
-    """Autogenerate detects the Item model and produces a valid migration."""
+def test_init_alembic_autogenerate_creates_migration(
+    app: pytest.fixture,
+    work_dir: Path,
+) -> None:
+    """Full workflow: scaffold, import app models, autogenerate, upgrade."""
     runner = CliRunner()
     runner.invoke(db, ["init-alembic"], catch_exceptions=False)
+
+    (work_dir / "alembic" / "env.py").write_text(ENV_PY)
 
     db_url = f"sqlite:///{work_dir}/test.db"
     cfg = AlembicConfig(str(work_dir / "alembic.ini"))
@@ -106,23 +126,22 @@ def test_init_alembic_autogenerate_creates_migration(work_dir: Path) -> None:
     assert len(migration_files) == 1
 
     migration_content = migration_files[0].read_text()
-    assert "op.create_table('items'" in migration_content
-    assert "'name'" in migration_content
-    assert "'uuid'" in migration_content
+    assert "op.create_table('books'" in migration_content
+    assert "'title'" in migration_content
+    assert "'author'" in migration_content
     assert "'created_at'" in migration_content
-    assert "'updated_at'" in migration_content
     assert "'created_by'" in migration_content
 
     alembic_command.upgrade(cfg, "head")
 
     engine = create_engine(db_url)
-    columns = {c["name"] for c in inspect(engine).get_columns("items")}
+    columns = {c["name"] for c in inspect(engine).get_columns("books")}
     engine.dispose()
 
     expected = {
         "id",
-        "uuid",
-        "name",
+        "title",
+        "author",
         "created_at",
         "updated_at",
         "created_ip",
