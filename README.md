@@ -16,7 +16,7 @@ Pyramid SQLAlchemy Integration — a reusable library that wires SQLAlchemy into
 
 ## Documentation
 
-Full documentation is available at the [docs site](docs/index.md), covering all features in detail.
+Full documentation is available at [tomascorrea.github.io/pyramid-sa](https://tomascorrea.github.io/pyramid-sa/), covering all features in detail.
 
 ## Installation
 

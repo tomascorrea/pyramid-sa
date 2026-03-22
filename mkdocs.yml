@@ -1,6 +1,7 @@
 site_name: pyramid-sa
+site_url: https://tomascorrea.github.io/pyramid-sa/
 site_description: Pyramid SQLAlchemy Integration
-repo_url: https://github.com/sensetek/pyramid-sa
+repo_url: https://github.com/tomascorrea/pyramid-sa
 theme:
   name: material
 nav:
