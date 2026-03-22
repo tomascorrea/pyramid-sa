@@ -14,9 +14,25 @@ from pyramid_sa.soft_delete import (
     sa_enable_soft_delete,
 )
 
+
+class Model(AuditMixin, SoftDeleteMixin, Base):
+    """Auditable, soft-deletable base class — the common case.
+
+    Use instead of ``Base`` when the model needs both audit columns and
+    soft-delete support::
+
+        class Article(Model):
+            __tablename__ = "articles"
+            ...
+    """
+
+    __abstract__ = True
+
+
 __all__ = [
     "AuditMixin",
     "Base",
+    "Model",
     "SoftDeleteMixin",
     "SoftDeleteSession",
     "generate_uuid",

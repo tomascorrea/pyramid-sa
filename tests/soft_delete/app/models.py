@@ -7,10 +7,10 @@ import uuid  # noqa: TCH003 — needed at runtime for SQLAlchemy mapped annotati
 from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from pyramid_sa import AuditMixin, Base, SoftDeleteMixin, generate_uuid
+from pyramid_sa import Base, Model, SoftDeleteMixin, generate_uuid
 
 
-class Article(AuditMixin, SoftDeleteMixin, Base):
+class Article(Model):
     """Soft-deletable model with a unique constraint."""
 
     __tablename__ = "articles"
