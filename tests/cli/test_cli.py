@@ -3,7 +3,10 @@
 from pathlib import Path
 
 import pytest
+from alembic import command as alembic_command
+from alembic.config import Config as AlembicConfig
 from click.testing import CliRunner
+from sqlalchemy import create_engine, inspect
 
 from pyramid_sa.scripts.cli import db
 
@@ -85,3 +88,46 @@ def test_init_alembic_refuses_when_only_dir_exists(work_dir: Path) -> None:
 
     assert result.exit_code != 0
     assert "Already exists" in result.output
+
+
+def test_init_alembic_autogenerate_creates_migration(work_dir: Path) -> None:
+    """Autogenerate detects the Item model and produces a valid migration."""
+    runner = CliRunner()
+    runner.invoke(db, ["init-alembic"], catch_exceptions=False)
+
+    db_url = f"sqlite:///{work_dir}/test.db"
+    cfg = AlembicConfig(str(work_dir / "alembic.ini"))
+    cfg.set_main_option("sqlalchemy.url", db_url)
+
+    alembic_command.revision(cfg, autogenerate=True, message="init")
+
+    versions_dir = work_dir / "alembic" / "versions"
+    migration_files = [f for f in versions_dir.iterdir() if f.suffix == ".py"]
+    assert len(migration_files) == 1
+
+    migration_content = migration_files[0].read_text()
+    assert "op.create_table('items'" in migration_content
+    assert "'name'" in migration_content
+    assert "'uuid'" in migration_content
+    assert "'created_at'" in migration_content
+    assert "'updated_at'" in migration_content
+    assert "'created_by'" in migration_content
+
+    alembic_command.upgrade(cfg, "head")
+
+    engine = create_engine(db_url)
+    columns = {c["name"] for c in inspect(engine).get_columns("items")}
+    engine.dispose()
+
+    expected = {
+        "id",
+        "uuid",
+        "name",
+        "created_at",
+        "updated_at",
+        "created_ip",
+        "updated_ip",
+        "created_by",
+        "updated_by",
+    }
+    assert expected == columns
