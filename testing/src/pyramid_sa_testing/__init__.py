@@ -5,14 +5,19 @@ import transaction
 import webtest
 from pyramid.scripting import prepare
 from sqlalchemy import create_engine
+from sqlalchemy.pool import NullPool
 
 from pyramid_sa import Base, get_tm_session
 
 
 @pytest.fixture(scope="session")
-def pyramid_sa_engine():
-    """SQLite in-memory engine. Override for PostgreSQL or other backends."""
-    engine = create_engine("sqlite://")
+def pyramid_sa_engine(postgresql_proc):
+    """PostgreSQL engine via pytest-postgresql. Override for other backends."""
+    url = (
+        f"postgresql+psycopg://{postgresql_proc.user}"
+        f":@{postgresql_proc.host}:{postgresql_proc.port}/postgres"
+    )
+    engine = create_engine(url, poolclass=NullPool)
     yield engine
     Base.metadata.drop_all(engine)
     engine.dispose()

@@ -38,6 +38,18 @@ Mixins provide **columns** at import time. Directives activate **behavior** at a
 - `config.sa_enable_audit()` registers event listeners that populate audit fields from the request
 - `config.sa_enable_soft_delete()` registers event listeners scoped to the app's sessionmaker (not global)
 
+## Test Infrastructure
+
+All tests run against PostgreSQL via pytest-postgresql. The `postgresql_proc` fixture (auto-registered by the plugin) starts a temporary PostgreSQL process on a random port per test session. Each `db_engine` fixture builds a `postgresql+psycopg://` URL from the process connection info. Doomed transactions provide per-test isolation.
+
+The soft-delete test module uses a dedicated database (`test_soft_delete`) because `sa_enable_soft_delete()` transforms unique constraints into partial indexes. Other modules share the default `postgres` database.
+
+The `pyramid_sa_testing` plugin provides `pyramid_sa_engine` (backed by `postgresql_proc`), `pyramid_sa_tm`, `pyramid_sa_dbsession`, `pyramid_sa_testapp`, and `pyramid_sa_app_request` fixtures.
+
+The devcontainer Dockerfile installs PostgreSQL server binaries so `postgresql_proc` can start its own instance.
+
 ## External Dependencies
 
 pyramid, sqlalchemy, alembic, pyramid-tm, zope-sqlalchemy, click, camel-converter
+
+Dev/test: pytest-postgresql, psycopg

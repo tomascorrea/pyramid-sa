@@ -12,6 +12,7 @@ from pyramid.config import Configurator
 from pyramid.scripting import prepare
 from sqlalchemy import String, create_engine
 from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.pool import NullPool
 
 from pyramid_sa import AuditMixin, Base, generate_uuid, get_tm_session
 
@@ -55,9 +56,18 @@ class TestSecurityPolicy:
         return []
 
 
+def _pg_engine(postgresql_proc, dbname: str = "postgres"):
+    """Create a PostgreSQL-backed SQLAlchemy engine from a postgresql_proc fixture."""
+    url = (
+        f"postgresql+psycopg://{postgresql_proc.user}"
+        f":@{postgresql_proc.host}:{postgresql_proc.port}/{dbname}"
+    )
+    return create_engine(url, poolclass=NullPool)
+
+
 @pytest.fixture(scope="session")
-def db_engine():
-    engine = create_engine("sqlite://")
+def db_engine(postgresql_proc):
+    engine = _pg_engine(postgresql_proc)
     Base.metadata.create_all(engine)
     yield engine
     Base.metadata.drop_all(engine)
