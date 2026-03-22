@@ -40,12 +40,3 @@ class Tag(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(100))
-
-
-class Task(SoftDeleteMixin, Base):
-    """Model with SoftDeleteMixin used against an app without the directive."""
-
-    __tablename__ = "tasks"
-
-    id: Mapped[int] = mapped_column(primary_key=True)
-    title: Mapped[str] = mapped_column(String(255))
