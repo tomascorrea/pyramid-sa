@@ -285,10 +285,11 @@ gh release list --limit 1
 
    Use the issue labels and nature of changes to decide.
 
-3. **Bump the version in project files** before tagging. Update the `version` field in `pyproject.toml` (and any other files that declare the version). Commit and push:
+3. **Bump the version** using `uv version --bump <level>` where level is `major`, `minor`, or `patch`. This updates `pyproject.toml` automatically. Then commit and push:
 
 ```bash
-git add pyproject.toml
+uv version --bump <level>
+git add pyproject.toml uv.lock
 git commit -m "chore: bump version to <version>"
 git push
 ```
