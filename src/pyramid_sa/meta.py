@@ -1,11 +1,11 @@
-"""SQLAlchemy declarative base, audit mixin, and event listeners."""
+"""SQLAlchemy declarative base, audit mixin, and utility helpers."""
 
 import uuid
 from datetime import UTC, datetime
 
 from camel_converter import dict_to_camel
-from sqlalchemy import DateTime, MetaData, String, event, inspect
-from sqlalchemy.orm import DeclarativeBase, Mapped, Mapper, mapped_column
+from sqlalchemy import DateTime, MetaData, String, inspect
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 NAMING_CONVENTION = {
     "ix": "ix_%(column_0_label)s",
@@ -71,29 +71,5 @@ class AuditMixin:
         return self.__class__(**data)
 
 
-class Base(AuditMixin, DeclarativeBase):
+class Base(DeclarativeBase):
     metadata = MetaData(naming_convention=NAMING_CONVENTION)
-
-
-@event.listens_for(Mapper, "before_insert")
-def _set_created_audit_fields(mapper, connection, target):
-    session = inspect(target).session
-    if session and (request := session.info.get("request")):
-        target.created_by = (
-            str(request.authenticated_userid)[:40]
-            if request.authenticated_userid
-            else None
-        )
-        target.created_ip = request.client_addr
-
-
-@event.listens_for(Mapper, "before_update")
-def _set_updated_audit_fields(mapper, connection, target):
-    session = inspect(target).session
-    if session and (request := session.info.get("request")):
-        target.updated_by = (
-            str(request.authenticated_userid)[:40]
-            if request.authenticated_userid
-            else None
-        )
-        target.updated_ip = request.client_addr

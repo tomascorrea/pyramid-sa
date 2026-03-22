@@ -131,3 +131,19 @@ def test_sa_scan_models_raises_on_bad_module():
 
     with pytest.raises(ModuleNotFoundError):
         config.sa_scan_models("nonexistent.module")
+
+
+def test_sa_enable_audit_registers_directive():
+    """Verify includeme registers the sa_enable_audit directive."""
+    config = Configurator(settings={"sqlalchemy.url": "sqlite://"})
+    config.include("pyramid_sa")
+
+    assert hasattr(config, "sa_enable_audit")
+
+
+def test_sa_enable_soft_delete_registers_directive():
+    """Verify includeme registers the sa_enable_soft_delete directive."""
+    config = Configurator(settings={"sqlalchemy.url": "sqlite://"})
+    config.include("pyramid_sa")
+
+    assert hasattr(config, "sa_enable_soft_delete")

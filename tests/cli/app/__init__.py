@@ -8,5 +8,6 @@ def create_app(dbengine=None, **settings):
     if dbengine is not None:
         config.registry["dbengine"] = dbengine
     config.include("pyramid_sa")
+    config.sa_enable_audit()
     config.sa_scan_models("tests.cli.app.models")
     return config.make_wsgi_app()
