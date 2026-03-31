@@ -2,7 +2,7 @@
 name = "pyramid-sa-testing"
 version = "0.1.0"
 description = "Pytest plugin for pyramid-sa"
-requires-python = ">=3.13"
+requires-python = ">=3.11"
 license = {text = "MIT"}
 dependencies = [
     "pyramid-sa",
