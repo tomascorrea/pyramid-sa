@@ -691,6 +691,19 @@ wheels = [
 ]
 
 [[package]]
+name = "pyramid-retry"
+version = "2.1.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pyramid" },
+    { name = "zope-interface" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/bf/02/2a084e7bc8ca3c50b67c6a6d58598c5771d93399e9ff2aadf6aa29c1adcc/pyramid_retry-2.1.1.tar.gz", hash = "sha256:baa8276ae68babad09e5f2f94efc4f7421f3b8fb526151df522052f8cd3ec0c9", size = 23266, upload-time = "2020-03-21T21:01:06.9Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b7/a7/b04390f36dcd0b117e023e4f980d6173da893b3c27f8b12ecd5dcc6fdb95/pyramid_retry-2.1.1-py2.py3-none-any.whl", hash = "sha256:b5129a60eb9d7409234ea52839006426d2ae887b4a1f0530c75ec336cabf2476", size = 6641, upload-time = "2020-03-21T21:01:05.701Z" },
+]
+
+[[package]]
 name = "pyramid-sa"
 version = "0.8.0"
 source = { editable = "." }
@@ -699,6 +712,7 @@ dependencies = [
     { name = "camel-converter" },
     { name = "click" },
     { name = "pyramid" },
+    { name = "pyramid-retry" },
     { name = "pyramid-tm" },
     { name = "sqlalchemy" },
     { name = "zope-sqlalchemy" },
@@ -724,6 +738,7 @@ requires-dist = [
     { name = "camel-converter", specifier = ">=3.0" },
     { name = "click", specifier = ">=8.1" },
     { name = "pyramid" },
+    { name = "pyramid-retry" },
     { name = "pyramid-tm", specifier = ">=2.6" },
     { name = "sqlalchemy", specifier = ">=2.0" },
     { name = "zope-sqlalchemy", specifier = ">=4.1" },

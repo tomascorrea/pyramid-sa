@@ -12,6 +12,7 @@ def renderer_app():
     """Pyramid Configurator with pyramid_sa included, ready for route registration."""
     config = Configurator(settings={"sqlalchemy.url": "sqlite://"})
     config.include("pyramid_sa")
+    config.sa_json_renderer()
     return config
 
 

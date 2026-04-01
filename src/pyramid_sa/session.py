@@ -1,6 +1,6 @@
 """SQLAlchemy engine and session management for Pyramid."""
 
-from sqlalchemy import create_engine
+from sqlalchemy import engine_from_config
 from sqlalchemy.orm import sessionmaker
 from zope.sqlalchemy import register
 
@@ -8,7 +8,7 @@ from pyramid_sa.models.soft_delete import SoftDeleteSession
 
 
 def get_engine(settings: dict, prefix: str = "sqlalchemy."):
-    return create_engine(settings[f"{prefix}url"])
+    return engine_from_config(settings, prefix)
 
 
 def get_session_factory(engine) -> sessionmaker[SoftDeleteSession]:

@@ -5,12 +5,20 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import NoResultFound
 
 
-def custom_not_found_body(request):
-    return {"code": "NOT_FOUND", "detail": "Nothing here."}
+def custom_not_found_body(request, exc=None, **kwargs):
+    return {
+        "code": "NOT_FOUND",
+        "detail": "Nothing here.",
+        "has_exc": exc is not None,
+    }
 
 
-def custom_conflict_body(request):
-    return {"code": "CONFLICT", "detail": "Duplicate entry."}
+def custom_conflict_body(request, exc=None, **kwargs):
+    return {
+        "code": "CONFLICT",
+        "detail": str(exc.orig) if exc else "Duplicate entry.",
+        "has_exc": exc is not None,
+    }
 
 
 def _view_not_found(request):
@@ -26,6 +34,7 @@ def create_app(dbengine=None, **settings):
     if dbengine is not None:
         config.registry["dbengine"] = dbengine
     config.include("pyramid_sa")
+    config.sa_json_renderer()
     config.sa_error_formatter(
         not_found=custom_not_found_body,
         conflict=custom_conflict_body,
