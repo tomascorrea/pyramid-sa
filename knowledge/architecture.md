@@ -23,14 +23,15 @@ pyramid-sa is a Pyramid integration library that provides SQLAlchemy session man
 ## Data Flow
 
 1. Consuming app calls `config.include("pyramid_sa")`
-2. `includeme` wires pyramid_tm, engine, session factory, tween, renderer, and registers directives (`sa_scan_models`, `sa_enable_audit`, `sa_enable_soft_delete`, `sa_error_formatter`)
-3. App calls `config.sa_enable_audit()` to activate audit event listeners
-4. App calls `config.sa_enable_soft_delete()` to activate soft-delete behavior (query filtering, delete interception, index finalization for `SoftDeleteUniqueIndex` and `soft_delete_mapped_column`)
-5. App calls `config.sa_scan_models("myapp.models")` to import model modules and configure mappers
-6. Each request gets a `request.dbsession` (reified, transaction-managed)
-7. Audit event listeners populate created_by/updated_by from the request
-8. Soft-delete event listeners intercept `session.delete()` and filter queries
-9. On exceptions, the tween maps SA errors to HTTP responses
+2. `includeme` wires pyramid_tm, pyramid_retry, engine, session factory, tweens (exception mapping + request-session wiring), and registers directives (`sa_json_renderer`, `sa_scan_models`, `sa_enable_audit`, `sa_enable_soft_delete`, `sa_error_formatter`)
+3. App calls `config.sa_json_renderer()` to register the JSON renderer (opt-in)
+4. App calls `config.sa_enable_audit()` to activate audit event listeners
+5. App calls `config.sa_enable_soft_delete()` to activate soft-delete behavior (query filtering, delete interception, index finalization for `SoftDeleteUniqueIndex` and `soft_delete_mapped_column`)
+6. App calls `config.sa_scan_models("myapp.models")` to import model modules and configure mappers (accepts strings or module objects)
+7. Each request gets a `request.dbsession` (reified, transaction-managed); the request-session tween ensures `dbsession.info["request"]` is always set
+8. Audit event listeners populate created_by/updated_by/created_ip/updated_ip from the request
+9. Soft-delete event listeners intercept `session.delete()` and filter queries
+10. On exceptions, the tween maps SA errors to HTTP responses; formatters receive the exception via `exc` keyword
 
 ## Columns vs Behavior
 
@@ -50,8 +51,16 @@ The `pyramid_sa_testing` plugin provides `pyramid_sa_engine` (backed by `postgre
 
 The devcontainer Dockerfile installs PostgreSQL server binaries so `postgresql_proc` can start its own instance.
 
+## Timezone Handling
+
+`_now()` in `utils.py` uses `datetime.UTC` (Python 3.11+) to produce timezone-aware UTC datetimes. The `tzinfo` is `datetime.timezone.utc`. This compares equal to `pytz.UTC` but has a different `repr`. Projects migrating from naive datetimes (`TIMESTAMP WITHOUT TIME ZONE`) should ensure column types use `TIMESTAMP(timezone=True)` or cast existing data.
+
+## Testing Plugin Override Points
+
+The `pyramid_sa_engine` fixture is the intended override point for projects that use a different PostgreSQL driver or test infrastructure. Override it in your `conftest.py` to yield a SQLAlchemy `Engine` instance and handle cleanup (e.g., `drop_all`, `dispose`). All other plugin fixtures (`pyramid_sa_tm`, `pyramid_sa_dbsession`, `pyramid_sa_testapp`, `pyramid_sa_app_request`) build on top of the engine and the `app` fixture.
+
 ## External Dependencies
 
-pyramid, sqlalchemy, alembic, pyramid-tm, zope-sqlalchemy, click, camel-converter
+pyramid, sqlalchemy, alembic, pyramid-tm, pyramid-retry, zope-sqlalchemy, click, camel-converter
 
 Dev/test: pytest-postgresql, psycopg

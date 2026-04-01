@@ -119,3 +119,22 @@ Use this format when adding a new decision:
 **Decision**: Replace the magic transformation with two explicit APIs the developer imports and uses: `SoftDeleteUniqueIndex(*columns)` for multi-column unique indexes in `__table_args__`, and `soft_delete_mapped_column(..., unique=True)` for single-column uniqueness at the column level. Both produce partial unique indexes with `WHERE deleted_at IS NULL`. A warning is logged when a plain `UniqueConstraint` is detected on a soft-delete model, nudging the developer to choose explicitly. `SoftDeleteUniqueIndex` validates at table creation time that the model has a `deleted_at` column (from `SoftDeleteMixin`), raising `TypeError` if not. Regular `mapped_column(unique=True)` stays globally unique — the developer chooses per-column.
 
 **Consequences**: Explicit is better than implicit. Developers opt in per-column, so globally unique columns (UUIDs, external IDs) are no longer silently transformed. `can_restore()` continues to work because both APIs produce indexes named `uq_{table}_{cols}_active`. This is a breaking change — consuming apps must update their models to use the new APIs. The warning helps catch missed columns during migration.
+
+### 2026-03-31 — Bugs and improvements from production comparison (v0.8.0)
+
+**Status**: Accepted
+
+**Context**: Comparing pyramid-sa v0.8.0 against battle-tested production patterns revealed several bugs and improvement opportunities.
+
+**Decision**: Applied the following changes:
+
+- **B1**: `get_engine` now uses `engine_from_config` instead of `create_engine(url)`, so all `sqlalchemy.*` INI keys (pool_size, pool_recycle, echo, etc.) are honoured.
+- **B2**: Added a request-session tween (`_add_request_to_session_tween_factory`) that sets `request.dbsession.info["request"] = request` on every request, ensuring audit listeners work even when sessions are injected via `request.environ["app.dbsession"]`.
+- **B3**: Testing plugin fixtures now set `REMOTE_ADDR` and wire `dbsession.info["request"]` so audit fields populate correctly in tests.
+- **B4**: JSON renderer is now opt-in via `config.sa_json_renderer()` directive instead of being registered unconditionally. **Breaking change** — consuming apps must call the directive explicitly.
+- **I1**: `pyramid_retry` is now included by default for transient DB error handling. Added to dependencies.
+- **I2**: `includeme` checks both `config.registry` and `settings` for a pre-configured `"dbengine"`.
+- **I3**: `sa_scan_models` accepts both dotted string paths and module objects.
+- **I6**: Error body formatters now receive the caught exception via `exc` keyword argument. Default formatters accept `**kwargs` for backwards compatibility.
+
+**Consequences**: B4 is a breaking change for consuming apps that relied on the auto-registered renderer. I6 requires existing custom formatters to accept `**kwargs` or an `exc` keyword. All other changes are backwards-compatible.
