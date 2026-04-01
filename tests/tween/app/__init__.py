@@ -27,6 +27,7 @@ def create_app(dbengine=None, **settings):
     if dbengine is not None:
         config.registry["dbengine"] = dbengine
     config.include("pyramid_sa")
+    config.sa_json_renderer()
 
     config.add_route("not_found", "/not-found")
     config.add_view(_view_not_found, route_name="not_found", renderer="json")

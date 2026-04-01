@@ -10,6 +10,7 @@ dependencies = [
     "sqlalchemy>=2.0",
     "alembic",
     "pyramid-tm>=2.6",
+    "pyramid-retry",
     "zope-sqlalchemy>=4.1",
     "click>=8.1",
     "camel-converter>=3.0",

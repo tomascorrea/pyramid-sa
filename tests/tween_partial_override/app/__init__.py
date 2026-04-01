@@ -5,7 +5,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import NoResultFound
 
 
-def custom_not_found_body(request):
+def custom_not_found_body(request, **kwargs):
     return {"code": "NOT_FOUND", "detail": "Custom 404."}
 
 
@@ -22,6 +22,7 @@ def create_app(dbengine=None, **settings):
     if dbengine is not None:
         config.registry["dbengine"] = dbengine
     config.include("pyramid_sa")
+    config.sa_json_renderer()
     config.sa_error_formatter(not_found=custom_not_found_body)
 
     config.add_route("not_found", "/not-found")

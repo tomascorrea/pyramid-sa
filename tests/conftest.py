@@ -82,6 +82,7 @@ def build_app(db_engine):
         config = Configurator(settings={})
         config.registry["dbengine"] = db_engine
         config.include("pyramid_sa")
+        config.sa_json_renderer()
         config.sa_enable_audit()
         config.set_security_policy(TestSecurityPolicy())
         if configure is not None:

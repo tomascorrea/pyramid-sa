@@ -47,6 +47,7 @@ def pyramid_sa_testapp(app, pyramid_sa_tm, pyramid_sa_dbsession):
         app,
         extra_environ={
             "HTTP_HOST": "example.com",
+            "REMOTE_ADDR": "127.0.0.1",
             "tm.active": True,
             "tm.manager": pyramid_sa_tm,
             "app.dbsession": pyramid_sa_dbsession,
@@ -62,6 +63,7 @@ def pyramid_sa_app_request(app, pyramid_sa_tm, pyramid_sa_dbsession):
         request.host = "example.com"
         request.environ.update(
             {
+                "REMOTE_ADDR": "127.0.0.1",
                 "tm.active": True,
                 "tm.manager": pyramid_sa_tm,
                 "app.dbsession": pyramid_sa_dbsession,
@@ -69,4 +71,5 @@ def pyramid_sa_app_request(app, pyramid_sa_tm, pyramid_sa_dbsession):
         )
         request.dbsession = pyramid_sa_dbsession
         request.tm = pyramid_sa_tm
+        pyramid_sa_dbsession.info["request"] = request
         yield request

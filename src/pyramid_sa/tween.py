@@ -10,18 +10,18 @@ from sqlalchemy.orm.exc import NoResultFound
 
 log = logging.getLogger(__name__)
 
-ErrorBodyFormatter = Callable[[Any], dict[str, Any]]
+ErrorBodyFormatter = Callable[..., dict[str, Any]]
 
 _REGISTRY_KEY_NOT_FOUND = "sa.error_formatter.not_found"
 _REGISTRY_KEY_CONFLICT = "sa.error_formatter.conflict"
 
 
-def default_not_found_body(request: Any) -> dict[str, Any]:
+def default_not_found_body(request: Any, **kwargs: Any) -> dict[str, Any]:
     """Return the default 404 error body."""
     return {"error": "not_found", "message": "Resource not found."}
 
 
-def default_conflict_body(request: Any) -> dict[str, Any]:
+def default_conflict_body(request: Any, **kwargs: Any) -> dict[str, Any]:
     """Return the default 409 error body."""
     return {
         "error": "conflict",
@@ -37,16 +37,21 @@ def sa_error_formatter(
 ) -> None:
     """Configure custom error body formatters for the exception tween.
 
-    Each formatter is a callable that receives the current request and returns
-    a dict used as the ``json_body`` of the HTTP error response.
+    Each formatter is a callable that receives the current request and
+    the caught exception (as ``exc`` keyword argument), and returns a dict
+    used as the ``json_body`` of the HTTP error response.
 
     Usage::
 
-        def my_not_found(request):
+        def my_not_found(request, **kwargs):
             return {"code": "NOT_FOUND", "detail": "Resource not found."}
 
+        def my_conflict(request, exc=None, **kwargs):
+            detail = str(exc.orig) if exc else "Duplicate entry."
+            return {"code": "CONFLICT", "detail": detail}
+
         config.include("pyramid_sa")
-        config.sa_error_formatter(not_found=my_not_found)
+        config.sa_error_formatter(not_found=my_not_found, conflict=my_conflict)
     """
     if not_found is not None:
         config.registry[_REGISTRY_KEY_NOT_FOUND] = not_found
@@ -66,14 +71,14 @@ def exception_tween_factory(handler: Any, registry: Any) -> Callable:
     def exception_tween(request: Any) -> Any:
         try:
             return handler(request)
-        except NoResultFound:
+        except NoResultFound as exc:
             raise HTTPNotFound(
-                json_body=not_found_formatter(request),
+                json_body=not_found_formatter(request, exc=exc),
             ) from None
         except IntegrityError as exc:
             log.warning("Integrity error: %s", exc.orig)
             raise HTTPConflict(
-                json_body=conflict_formatter(request),
+                json_body=conflict_formatter(request, exc=exc),
             ) from exc
 
     return exception_tween

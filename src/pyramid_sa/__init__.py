@@ -1,6 +1,7 @@
 """Pyramid SQLAlchemy Integration."""
 
 import importlib
+from types import ModuleType
 
 from sqlalchemy.orm import configure_mappers
 
@@ -33,6 +34,7 @@ __all__ = [
     "SoftDeleteMixin",
     "SoftDeleteSession",
     "SoftDeleteUniqueIndex",
+    "configure_json_renderer",
     "default_conflict_body",
     "default_not_found_body",
     "generate_uuid",
@@ -46,23 +48,43 @@ __all__ = [
 ]
 
 
-def _scan_models_directive(config: object, *module_paths: str) -> None:
+def _scan_models_directive(config: object, *module_paths: str | ModuleType) -> None:
     """Import model modules and configure SQLAlchemy mappers.
 
-    Accepts one or more dotted Python module paths.  Each module is imported
-    (which registers its models with ``Base``), then ``configure_mappers()``
+    Accepts one or more dotted Python module paths or already-imported module
+    objects.  Each string path is imported (which registers its models with
+    ``Base``); module objects are accepted as-is.  Then ``configure_mappers()``
     is called once so that all relationships are resolved.
 
     Usage::
 
         config.include("pyramid_sa")
         config.sa_scan_models("myapp.models")
+
+        import myapp.models
+        config.sa_scan_models(myapp.models)
     """
     if not module_paths:
         raise ValueError("sa_scan_models requires at least one module path")
     for path in module_paths:
-        importlib.import_module(path)
+        if not isinstance(path, ModuleType):
+            importlib.import_module(path)
     configure_mappers()
+
+
+def _add_request_to_session_tween_factory(handler, registry):
+    """Ensure ``request.dbsession.info["request"]`` is always set.
+
+    Without this tween, sessions injected via ``request.environ["app.dbsession"]``
+    (the standard test path) would lack the request reference, causing audit
+    listeners to silently skip field population.
+    """
+
+    def tween(request):
+        request.dbsession.info["request"] = request
+        return handler(request)
+
+    return tween
 
 
 def includeme(config):
@@ -72,8 +94,9 @@ def includeme(config):
     """
     settings = config.get_settings()
     config.include("pyramid_tm")
+    config.include("pyramid_retry")
 
-    engine = config.registry.get("dbengine")
+    engine = config.registry.get("dbengine") or settings.get("dbengine")
     if engine is None:
         engine = get_engine(settings)
 
@@ -91,9 +114,12 @@ def includeme(config):
         "pyramid_sa.tween.exception_tween_factory",
         under="pyramid.tweens.excview_tween_factory",
     )
+    config.add_tween(
+        "pyramid_sa._add_request_to_session_tween_factory",
+        under="pyramid_sa.tween.exception_tween_factory",
+    )
 
-    configure_json_renderer(config)
-
+    config.add_directive("sa_json_renderer", configure_json_renderer)
     config.add_directive("sa_scan_models", _scan_models_directive)
     config.add_directive("sa_enable_audit", sa_enable_audit)
     config.add_directive("sa_enable_soft_delete", sa_enable_soft_delete)
