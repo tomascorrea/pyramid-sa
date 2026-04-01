@@ -1,0 +1,1537 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Pyramid SQLAlchemy Integration">
+      
+      
+      
+        <link rel="canonical" href="https://tomascorrea.github.io/pyramid-sa/api/">
+      
+      
+        <link rel="prev" href="../testing/">
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>API Reference - pyramid-sa</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#api-reference" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="pyramid-sa" class="md-header__button md-logo" aria-label="pyramid-sa" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            pyramid-sa
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              API Reference
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/tomascorrea/pyramid-sa" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="pyramid-sa" class="md-nav__button md-logo" aria-label="pyramid-sa" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    pyramid-sa
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/tomascorrea/pyramid-sa" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Base & Models
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../audit/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Audit Trail
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../soft-delete/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Soft Delete
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../error-handling/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Error Handling
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../database/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Database & Migrations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#pyramid_sa" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pyramid_sa
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="pyramid_sa">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#includemeconfig" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        includeme(config)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Model
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pyramid_sameta" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pyramid_sa.meta
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="pyramid_sa.meta">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#base" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Base
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ormclass" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ORMClass
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#generate_uuid-uuiduuid" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        generate_uuid() -&gt; uuid.UUID
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pyramid_samodelsaudit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pyramid_sa.models.audit
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="pyramid_sa.models.audit">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#auditmixin" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AuditMixin
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sa_enable_auditconfig-none" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        sa_enable_audit(config) -&gt; None
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pyramid_samodelssoft_delete" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pyramid_sa.models.soft_delete
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="pyramid_sa.models.soft_delete">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#softdeletemixin" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SoftDeleteMixin
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#softdeletesession" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SoftDeleteSession
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#softdeleteuniqueindexcolumns-namenone" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SoftDeleteUniqueIndex(*columns, name=None)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#soft_delete_mapped_columnargs-uniquefalse-kwargs-mappedcolumn" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        soft_delete_mapped_column(*args, unique=False, **kwargs) -&gt; MappedColumn
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#restoreconflicterror" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RestoreConflictError
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sa_enable_soft_deleteconfig-none" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        sa_enable_soft_delete(config) -&gt; None
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pyramid_sasession" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pyramid_sa.session
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="pyramid_sa.session">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#get_enginesettings-prefixsqlalchemy-engine" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_engine(settings, prefix="sqlalchemy.") -&gt; Engine
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get_session_factoryengine-sessionmakersoftdeletesession" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_session_factory(engine) -&gt; sessionmaker[SoftDeleteSession]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get_tm_sessionsession_factory-transaction_manager-requestnone-softdeletesession" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_tm_session(session_factory, transaction_manager, request=None) -&gt; SoftDeleteSession
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pyramid_satween" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pyramid_sa.tween
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="pyramid_sa.tween">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sa_error_formatterconfig-not_foundnone-conflictnone-none" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        sa_error_formatter(config, *, not_found=None, conflict=None) -&gt; None
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#default_not_found_bodyrequest-dict" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        default_not_found_body(request) -&gt; dict
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#default_conflict_bodyrequest-dict" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        default_conflict_body(request) -&gt; dict
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#exception_tween_factoryhandler-registry-callable" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        exception_tween_factory(handler, registry) -&gt; Callable
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pyramid_sarenderer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pyramid_sa.renderer
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="pyramid_sa.renderer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#configure_json_rendererconfig-none" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        configure_json_renderer(config) -&gt; None
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pyramid_sascriptscli" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pyramid_sa.scripts.cli
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="pyramid_sa.scripts.cli">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#db" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        db
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pyramid_sascriptsalembic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pyramid_sa.scripts.alembic
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="pyramid_sa.scripts.alembic">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#run_migrations_offlinetarget_metadata-none" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        run_migrations_offline(target_metadata) -&gt; None
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#run_migrations_onlinetarget_metadata-none" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        run_migrations_online(target_metadata) -&gt; None
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#pyramid_sa" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pyramid_sa
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="pyramid_sa">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#includemeconfig" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        includeme(config)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Model
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pyramid_sameta" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pyramid_sa.meta
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="pyramid_sa.meta">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#base" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Base
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ormclass" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ORMClass
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#generate_uuid-uuiduuid" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        generate_uuid() -&gt; uuid.UUID
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pyramid_samodelsaudit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pyramid_sa.models.audit
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="pyramid_sa.models.audit">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#auditmixin" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AuditMixin
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sa_enable_auditconfig-none" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        sa_enable_audit(config) -&gt; None
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pyramid_samodelssoft_delete" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pyramid_sa.models.soft_delete
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="pyramid_sa.models.soft_delete">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#softdeletemixin" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SoftDeleteMixin
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#softdeletesession" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SoftDeleteSession
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#softdeleteuniqueindexcolumns-namenone" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SoftDeleteUniqueIndex(*columns, name=None)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#soft_delete_mapped_columnargs-uniquefalse-kwargs-mappedcolumn" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        soft_delete_mapped_column(*args, unique=False, **kwargs) -&gt; MappedColumn
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#restoreconflicterror" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RestoreConflictError
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sa_enable_soft_deleteconfig-none" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        sa_enable_soft_delete(config) -&gt; None
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pyramid_sasession" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pyramid_sa.session
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="pyramid_sa.session">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#get_enginesettings-prefixsqlalchemy-engine" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_engine(settings, prefix="sqlalchemy.") -&gt; Engine
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get_session_factoryengine-sessionmakersoftdeletesession" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_session_factory(engine) -&gt; sessionmaker[SoftDeleteSession]
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get_tm_sessionsession_factory-transaction_manager-requestnone-softdeletesession" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_tm_session(session_factory, transaction_manager, request=None) -&gt; SoftDeleteSession
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pyramid_satween" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pyramid_sa.tween
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="pyramid_sa.tween">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sa_error_formatterconfig-not_foundnone-conflictnone-none" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        sa_error_formatter(config, *, not_found=None, conflict=None) -&gt; None
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#default_not_found_bodyrequest-dict" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        default_not_found_body(request) -&gt; dict
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#default_conflict_bodyrequest-dict" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        default_conflict_body(request) -&gt; dict
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#exception_tween_factoryhandler-registry-callable" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        exception_tween_factory(handler, registry) -&gt; Callable
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pyramid_sarenderer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pyramid_sa.renderer
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="pyramid_sa.renderer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#configure_json_rendererconfig-none" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        configure_json_renderer(config) -&gt; None
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pyramid_sascriptscli" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pyramid_sa.scripts.cli
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="pyramid_sa.scripts.cli">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#db" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        db
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pyramid_sascriptsalembic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pyramid_sa.scripts.alembic
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="pyramid_sa.scripts.alembic">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#run_migrations_offlinetarget_metadata-none" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        run_migrations_offline(target_metadata) -&gt; None
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#run_migrations_onlinetarget_metadata-none" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        run_migrations_online(target_metadata) -&gt; None
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="api-reference">API Reference</h1>
+<p>Complete public API grouped by module. All items listed here are importable from their respective modules. Items marked with <strong>top-level</strong> are also importable directly from <code>pyramid_sa</code>.</p>
+<h2 id="pyramid_sa"><code>pyramid_sa</code></h2>
+<p>The top-level package re-exports the most commonly used names and provides the Pyramid entry point.</p>
+<h3 id="includemeconfig"><code>includeme(config)</code></h3>
+<p>Pyramid entry point. Activate with <code>config.include("pyramid_sa")</code>. Wires engine, session factory, <code>request.dbsession</code>, exception tween, JSON renderer, and registers all directives.</p>
+<h3 id="model"><code>Model</code></h3>
+<p><strong>top-level</strong> — <code>class Model(AuditMixin, SoftDeleteMixin, Base)</code></p>
+<p>Abstract base class combining audit columns, soft-delete columns, and all <code>Base</code> utilities. Use for models that need both features.</p>
+<hr />
+<h2 id="pyramid_sameta"><code>pyramid_sa.meta</code></h2>
+<h3 id="base"><code>Base</code></h3>
+<p><strong>top-level</strong> — <code>class Base(ORMClass, DeclarativeBase)</code></p>
+<p>Declarative base with naming conventions and utility methods. All models should inherit from this (or from <code>Model</code>).</p>
+<h3 id="ormclass"><code>ORMClass</code></h3>
+<p>Mixin class providing utility methods on all models.</p>
+<p><strong><code>as_dict(hide_internal_fields=True, convert_to_camel=True, exclude=None) -&gt; dict</code></strong></p>
+<p>Convert instance to a dictionary. See <a href="../models/#as_dict">Base &amp; Models</a> for details.</p>
+<p><strong><code>copy_with(**kwargs) -&gt; Self</code></strong></p>
+<p>Create a detached copy with optional field overrides. Excludes <code>id</code>, <code>uuid</code>, <code>created_at</code>, <code>updated_at</code>.</p>
+<h3 id="generate_uuid-uuiduuid"><code>generate_uuid() -&gt; uuid.UUID</code></h3>
+<p><strong>top-level</strong> — Returns a new UUID v4.</p>
+<hr />
+<h2 id="pyramid_samodelsaudit"><code>pyramid_sa.models.audit</code></h2>
+<h3 id="auditmixin"><code>AuditMixin</code></h3>
+<p><strong>top-level</strong> — Mixin adding audit columns: <code>created_at</code>, <code>updated_at</code>, <code>created_by</code>, <code>updated_by</code>, <code>created_ip</code>, <code>updated_ip</code>.</p>
+<h3 id="sa_enable_auditconfig-none"><code>sa_enable_audit(config) -&gt; None</code></h3>
+<p><strong>top-level</strong> — Pyramid directive. Registers <code>before_insert</code> and <code>before_update</code> event listeners that populate audit fields from <code>request.authenticated_userid</code> and <code>request.client_addr</code>.</p>
+<hr />
+<h2 id="pyramid_samodelssoft_delete"><code>pyramid_sa.models.soft_delete</code></h2>
+<h3 id="softdeletemixin"><code>SoftDeleteMixin</code></h3>
+<p><strong>top-level</strong> — Mixin adding soft-delete columns and instance methods.</p>
+<p><strong>Columns:</strong> <code>deleted_at</code> (DateTime), <code>deleted_by</code> (String(40)), <code>deleted_ip</code> (String(40))</p>
+<p><strong><code>is_deleted -&gt; bool</code></strong> (property)</p>
+<p>Returns <code>True</code> if <code>deleted_at</code> is not <code>None</code>.</p>
+<p><strong><code>soft_delete() -&gt; None</code></strong></p>
+<p>Mark the instance as soft-deleted. Sets <code>deleted_at</code>, <code>deleted_by</code>, and <code>deleted_ip</code> from the request.</p>
+<p><strong><code>can_restore() -&gt; list[tuple[str, ...]]</code></strong></p>
+<p>Check for unique constraint conflicts before restoring. Returns a list of conflicting column groups (empty = safe to restore).</p>
+<p><strong><code>restore() -&gt; None</code></strong></p>
+<p>Clear <code>deleted_at</code>, <code>deleted_by</code>, and <code>deleted_ip</code>. Raises <code>RestoreConflictError</code> if an active row conflicts.</p>
+<h3 id="softdeletesession"><code>SoftDeleteSession</code></h3>
+<p><strong>top-level</strong> — <code>class SoftDeleteSession(Session)</code></p>
+<p>Session subclass used by pyramid-sa's session factory.</p>
+<p><strong><code>hard_delete(instance) -&gt; None</code></strong></p>
+<p>Perform a real SQL DELETE, bypassing soft-delete interception.</p>
+<h3 id="softdeleteuniqueindexcolumns-namenone"><code>SoftDeleteUniqueIndex(*columns, name=None)</code></h3>
+<p><strong>top-level</strong> — <code>class SoftDeleteUniqueIndex(Index)</code></p>
+<p>Partial unique index for <code>__table_args__</code>. Creates <code>WHERE deleted_at IS NULL</code> unique index on the specified columns. Validates that the model has <code>SoftDeleteMixin</code>.</p>
+<h3 id="soft_delete_mapped_columnargs-uniquefalse-kwargs-mappedcolumn"><code>soft_delete_mapped_column(*args, unique=False, **kwargs) -&gt; MappedColumn</code></h3>
+<p><strong>top-level</strong> — Like <code>mapped_column</code> but <code>unique=True</code> creates a soft-delete-aware partial unique index instead of a plain unique constraint.</p>
+<h3 id="restoreconflicterror"><code>RestoreConflictError</code></h3>
+<p><strong>top-level</strong> — <code>class RestoreConflictError(Exception)</code></p>
+<p>Raised by <code>restore()</code> when an active row conflicts with the soft-deleted row's unique values.</p>
+<p><strong>Attributes:</strong></p>
+<ul>
+<li><code>instance</code> — the model instance that cannot be restored</li>
+<li><code>conflicts</code> — list of column-name tuples, e.g. <code>[("slug",)]</code> or <code>[("tenant_id", "code")]</code></li>
+</ul>
+<h3 id="sa_enable_soft_deleteconfig-none"><code>sa_enable_soft_delete(config) -&gt; None</code></h3>
+<p><strong>top-level</strong> — Pyramid directive. Registers event listeners for delete interception, query filtering, and index finalization on the app's sessionmaker.</p>
+<hr />
+<h2 id="pyramid_sasession"><code>pyramid_sa.session</code></h2>
+<h3 id="get_enginesettings-prefixsqlalchemy-engine"><code>get_engine(settings, prefix="sqlalchemy.") -&gt; Engine</code></h3>
+<p><strong>top-level</strong> — Create a SQLAlchemy engine from the <code>{prefix}url</code> key in settings.</p>
+<h3 id="get_session_factoryengine-sessionmakersoftdeletesession"><code>get_session_factory(engine) -&gt; sessionmaker[SoftDeleteSession]</code></h3>
+<p><strong>top-level</strong> — Create a session factory bound to the engine, using <code>SoftDeleteSession</code>.</p>
+<h3 id="get_tm_sessionsession_factory-transaction_manager-requestnone-softdeletesession"><code>get_tm_session(session_factory, transaction_manager, request=None) -&gt; SoftDeleteSession</code></h3>
+<p><strong>top-level</strong> — Create a transaction-managed session. Registers the session with zope.sqlalchemy and stores the request in <code>session.info["request"]</code>.</p>
+<hr />
+<h2 id="pyramid_satween"><code>pyramid_sa.tween</code></h2>
+<h3 id="sa_error_formatterconfig-not_foundnone-conflictnone-none"><code>sa_error_formatter(config, *, not_found=None, conflict=None) -&gt; None</code></h3>
+<p><strong>top-level</strong> — Pyramid directive. Configure custom error body formatters for the exception tween. Each formatter is <code>(request) -&gt; dict</code>.</p>
+<h3 id="default_not_found_bodyrequest-dict"><code>default_not_found_body(request) -&gt; dict</code></h3>
+<p><strong>top-level</strong> — Returns <code>{"error": "not_found", "message": "Resource not found."}</code>.</p>
+<h3 id="default_conflict_bodyrequest-dict"><code>default_conflict_body(request) -&gt; dict</code></h3>
+<p><strong>top-level</strong> — Returns <code>{"error": "conflict", "message": "Operation violates a uniqueness constraint."}</code>.</p>
+<h3 id="exception_tween_factoryhandler-registry-callable"><code>exception_tween_factory(handler, registry) -&gt; Callable</code></h3>
+<p>Tween factory that catches <code>NoResultFound</code> (→ 404) and <code>IntegrityError</code> (→ 409).</p>
+<hr />
+<h2 id="pyramid_sarenderer"><code>pyramid_sa.renderer</code></h2>
+<h3 id="configure_json_rendererconfig-none"><code>configure_json_renderer(config) -&gt; None</code></h3>
+<p>Register a JSON renderer with adapters for <code>datetime</code> (→ ISO string), <code>date</code> (→ ISO string), and <code>UUID</code> (→ string).</p>
+<hr />
+<h2 id="pyramid_sascriptscli"><code>pyramid_sa.scripts.cli</code></h2>
+<h3 id="db"><code>db</code></h3>
+<p>Click command group for database management. Contains <code>init-alembic</code>, <code>drop</code>, and <code>initialize</code> subcommands. See <a href="../database/">Database &amp; Migrations</a> for usage.</p>
+<hr />
+<h2 id="pyramid_sascriptsalembic"><code>pyramid_sa.scripts.alembic</code></h2>
+<h3 id="run_migrations_offlinetarget_metadata-none"><code>run_migrations_offline(target_metadata) -&gt; None</code></h3>
+<p>Run Alembic migrations in offline mode (SQL output only).</p>
+<h3 id="run_migrations_onlinetarget_metadata-none"><code>run_migrations_online(target_metadata) -&gt; None</code></h3>
+<p>Run Alembic migrations in online mode (direct database connection).</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": [], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
